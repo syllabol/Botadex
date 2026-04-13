@@ -1,0 +1,11 @@
+{
+  "classes": ["cassava", "tomato", "potato"],
+  "data": [
+    { "label": "cassava", "features": [0.82, 0.45, 0.60] },
+    { "label": "cassava", "features": [0.80, 0.50, 0.58] },
+    { "label": "tomato", "features": [0.75, 0.60, 0.55] },
+    { "label": "tomato", "features": [0.72, 0.62, 0.53] },
+    { "label": "potato", "features": [0.40, 0.50, 0.70] },
+    { "label": "potato", "features": [0.38, 0.52, 0.68] }
+  ]
+}

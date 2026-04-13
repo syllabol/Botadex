@@ -1,0 +1,116 @@
+{
+  "cassava": {
+    "scientific_name": "Manihot esculenta",
+    "description": "Cassava is a drought-tolerant root crop widely grown in tropical regions. It is rich in carbohydrates and serves as a staple food for millions.",
+    "watering": "Water moderately; avoid waterlogging.",
+    "fertilization": "Apply balanced NPK fertilizer every 4-6 weeks.",
+    "pest_control": "Monitor for cassava mealybugs and root rot.",
+    "uses": "Used for flour, animal feed, and biofuel.",
+    "characteristics": ["Starchy root", "Drought tolerant", "Perennial shrub", "High carbohydrate"],
+    "culinary_uses": ["Cassava cake", "Boiled cassava", "Tapioca flour", "Chips"],
+    "medicinal_uses": ["Anti-inflammatory", "Wound healing (leaves)", "Fever reduction"],
+    "growth_stages": [
+      {"stage": "Planting", "description": "Cuttings are placed in well-drained soil."},
+      {"stage": "Sprouting", "description": "Vines emerge within 1-3 weeks."},
+      {"stage": "Vegetative Growth", "description": "Rapid leaf and stem development."},
+      {"stage": "Root Formation", "description": "Carbohydrates begin storage in roots."},
+      {"stage": "Maturity", "description": "Harvestable within 8-12 months."}
+    ],
+    "harvesting": "Harvest when leaves turn yellow and fall."
+  },
+  "tomato": {
+    "scientific_name": "Solanum lycopersicum",
+    "description": "Tomato is a popular fruiting crop grown worldwide. It is rich in vitamins A and C and can be eaten raw or cooked.",
+    "watering": "Water consistently, especially during flowering.",
+    "fertilization": "Use phosphorus-rich fertilizer during fruiting.",
+    "pest_control": "Watch for whiteflies and tomato blight.",
+    "uses": "Used for fresh consumption, sauces, and soups.",
+    "characteristics": ["Red fruit", "Vining growth", "Vitamin C source", "Warm season"],
+    "culinary_uses": ["Salads", "Pasta sauces", "Ketchup", "Soups"],
+    "medicinal_uses": ["Antioxidant", "Eye health", "Skin health"],
+    "growth_stages": [
+      {"stage": "Planting", "description": "Seeds sown in nursery or direct."},
+      {"stage": "Sprouting", "description": "First leaves appear in 5-10 days."},
+      {"stage": "Flowering", "description": "Yellow flowers indicate upcoming fruit."},
+      {"stage": "Fruiting", "description": "Green fruits develop and turn red."},
+      {"stage": "Maturity", "description": "Full red color indicates harvest ready."}
+    ],
+    "harvesting": "Pick when firm and fully colored."
+  },
+  "potato": {
+    "scientific_name": "Solanum tuberosum",
+    "description": "Potato is a widely grown root vegetable cultivated for its starchy tubers. It is a staple food in many countries.",
+    "watering": "Keep soil moist but not waterlogged.",
+    "fertilization": "Apply potassium-rich fertilizer as tubers develop.",
+    "pest_control": "Monitor for Colorado potato beetles.",
+    "uses": "Commonly boiled, baked, fried, or mashed.",
+    "characteristics": ["Underground tuber", "Herbaceous perennial", "Starch heavy", "Cool climate"],
+    "culinary_uses": ["French fries", "Mashed potatoes", "Potato salad", "Baked"],
+    "medicinal_uses": ["Digestive health", "Potassium source", "Blood pressure"],
+    "growth_stages": [
+      {"stage": "Planting", "description": "Seed potatoes placed in ridges."},
+      {"stage": "Sprouting", "description": "Shoots emerge from the soil."},
+      {"stage": "Stolon Growth", "description": "Lateral stems grow underground."},
+      {"stage": "Tuber Initiation", "description": "Tubers begin to swell at stolon ends."},
+      {"stage": "Maturity", "description": "Vines die back, skin toughens."}
+    ],
+    "harvesting": "Harvest after vines have naturally died."
+  },
+  "ube": {
+    "scientific_name": "Dioscorea alata",
+    "description": "Ube, or purple yam, is a starchy root crop known for its vibrant purple flesh and sweet flavor.",
+    "watering": "Provide consistent moisture during growth.",
+    "fertilization": "Incorporate compost at planting.",
+    "pest_control": "Monitor for yam beetles and mealybugs.",
+    "uses": "Used in Filipino desserts and ice cream.",
+    "characteristics": ["Purple flesh", "Sweet flavor", "Vine plant", "Tropical crop"],
+    "culinary_uses": ["Ube halaya", "Ice cream", "Cakes", "Pastries"],
+    "medicinal_uses": ["Antioxidant", "Anthocyanin source", "Anti-aging"],
+    "growth_stages": [
+      {"stage": "Planting", "description": "Tuber sets planted in mounds."},
+      {"stage": "Vining", "description": "Climbing stems require support."},
+      {"stage": "Leaf Development", "description": "Vigorous foliage growth."},
+      {"stage": "Tuber Bulking", "description": "Underground yam expansion."},
+      {"stage": "Maturity", "description": "Foliage senesces in 7-9 months."}
+    ],
+    "harvesting": "Harvest when vines turn brown and dry."
+  },
+  "kamote": {
+    "scientific_name": "Ipomoea batatas",
+    "description": "Kamote, or sweet potato, is a hardy root crop cultivated for its sweet tubers and edible leaves.",
+    "watering": "Water regularly to establish vines.",
+    "fertilization": "Apply phosphorus-rich fertilizer.",
+    "pest_control": "Watch for sweet potato weevils.",
+    "uses": "Tubers and young shoots are both edible.",
+    "characteristics": ["Sweet tuber", "Edible leaves", "Creeping vine", "High Vitamin A"],
+    "culinary_uses": ["Kamote cue", "Roasted kamote", "Salads", "Boiled"],
+    "medicinal_uses": ["Vitamin A source", "Blood sugar regulation", "Antiviral"],
+    "growth_stages": [
+      {"stage": "Planting", "description": "Cuttings (slips) planted in ridges."},
+      {"stage": "Vining", "description": "Vines spread across the ground."},
+      {"stage": "Leaf Expansion", "description": "Dense ground cover forms."},
+      {"stage": "Tuber Initiation", "description": "Roots start to thicken into tubers."},
+      {"stage": "Maturity", "description": "Harvestable in 3-5 months."}
+    ],
+    "harvesting": "Harvest carefully to avoid bruising."
+  },
+  "onion": {
+    "scientific_name": "Allium cepa",
+    "description": "Onion is a widely cultivated bulb vegetable known for its pungent flavor and layers. It is a fundamental ingredient in cuisines worldwide.",
+    "watering": "Water regularly, especially during bulb formation; reduce watering as they mature.",
+    "fertilization": "Apply nitrogen-rich fertilizer during early growth.",
+    "pest_control": "Watch for onion flies, thrips, and downy mildew.",
+    "uses": "Used as a base for many dishes, can be eaten raw, cooked, or pickled.",
+    "characteristics": ["Bulb vegetable", "Pungent flavor", "Hollow leaves", "Layered structure"],
+    "culinary_uses": ["Sautéed onions", "Onion rings", "Salads", "Soups"],
+    "medicinal_uses": ["Antibacterial", "Quercetin source", "Heart health"],
+    "growth_stages": [
+      {"stage": "Planting", "description": "Seeds, sets, or transplants are placed in fertile soil."},
+      {"stage": "Sprouting", "description": "Green shoots emerge from the soil."},
+      {"stage": "Leaf Development", "description": "Foliage grows to provide energy for the bulb."},
+      {"stage": "Bulb Initiation", "description": "Base of the plant starts to swell into a bulb."},
+      {"stage": "Maturity", "description": "Leaves fall over and turn brown."}
+    ],
+    "harvesting": "Harvest when tops turn yellow and fall over."
+  }
+}
