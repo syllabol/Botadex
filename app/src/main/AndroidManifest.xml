@@ -25,6 +25,11 @@
         <activity android:name=".JournalActivity" />
         <activity android:name=".RemindersActivity" />
         <activity android:name=".CropDetailActivity" />
+        <activity android:name=".CollectionDetailActivity" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

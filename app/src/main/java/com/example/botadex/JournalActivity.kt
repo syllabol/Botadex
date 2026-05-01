@@ -2,14 +2,14 @@ package com.example.botadex
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -17,14 +17,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.botadex.database.BotadexDatabase
-import com.example.botadex.database.JournalEntry
+import com.example.botadex.database.JournalCollection
 import kotlinx.coroutines.launch
-import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class JournalActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: JournalAdapter
+    private lateinit var adapter: CollectionAdapter
     private lateinit var db: BotadexDatabase
 
     @SuppressLint("MissingInflatedId")
@@ -45,6 +46,10 @@ class JournalActivity : AppCompatActivity() {
             finish()
         }
 
+        findViewById<View>(R.id.addCollectionButton).setOnClickListener {
+            showAddCollectionDialog()
+        }
+
         // Bottom Navigation
         findViewById<View>(R.id.navIdentify).setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
@@ -59,19 +64,20 @@ class JournalActivity : AppCompatActivity() {
             startActivity(Intent(this, RemindersActivity::class.java))
         }
 
-        loadJournalEntries()
+        loadCollections()
     }
 
-    private fun loadJournalEntries() {
+    private fun loadCollections() {
         lifecycleScope.launch {
             try {
-                val entries = db.cropDao().getAllJournal()
-                adapter = JournalAdapter(entries.toMutableList(), { entry ->
-                    val intent = Intent(this@JournalActivity, AddJournalEntryActivity::class.java)
-                    intent.putExtra("JOURNAL_ID", entry.id)
+                val collections = db.cropDao().getAllCollections()
+                adapter = CollectionAdapter(collections.toMutableList(), { collection ->
+                    val intent = Intent(this@JournalActivity, CollectionDetailActivity::class.java)
+                    intent.putExtra("COLLECTION_ID", collection.id)
+                    intent.putExtra("COLLECTION_TITLE", collection.title)
                     startActivity(intent)
-                }, { entry ->
-                    showDeleteConfirmationDialog(entry)
+                }, { collection ->
+                    showDeleteCollectionDialog(collection)
                 })
                 recyclerView.adapter = adapter
             } catch (e: Exception) {
@@ -80,87 +86,98 @@ class JournalActivity : AppCompatActivity() {
         }
     }
 
-    private fun showDeleteConfirmationDialog(entry: JournalEntry) {
+    private fun showAddCollectionDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_collection, null)
+        val editTitle = dialogView.findViewById<EditText>(R.id.editCollectionTitle)
+        
         AlertDialog.Builder(this)
-            .setTitle("Delete Entry")
-            .setMessage("Are you sure you want to delete this journal entry?")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteEntry(entry)
+            .setTitle("New Collection")
+            .setView(dialogView)
+            .setPositiveButton("Create") { _, _ ->
+                val title = editTitle.text.toString()
+                if (title.isNotEmpty()) {
+                    createCollection(title)
+                } else {
+                    Toast.makeText(this, "Title cannot be empty", Toast.LENGTH_SHORT).show()
+                }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun deleteEntry(entry: JournalEntry) {
+    private fun createCollection(title: String) {
+        val date = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(Date())
+        val collection = JournalCollection(title = title, cropName = "", date = date)
         lifecycleScope.launch {
-            db.cropDao().deleteJournalEntry(entry)
-            loadJournalEntries()
+            db.cropDao().insertCollection(collection)
+            loadCollections()
+        }
+    }
+
+    private fun showDeleteCollectionDialog(collection: JournalCollection) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Collection")
+            .setMessage("Are you sure you want to delete '${collection.title}' and all its entries?")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteCollection(collection)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteCollection(collection: JournalCollection) {
+        lifecycleScope.launch {
+            db.cropDao().deleteCollection(collection)
+            loadCollections()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        loadJournalEntries()
+        loadCollections()
     }
 
-    class JournalAdapter(
-        private val entries: MutableList<JournalEntry>,
-        private val onItemClick: (JournalEntry) -> Unit,
-        private val onDeleteClick: (JournalEntry) -> Unit
-    ) : RecyclerView.Adapter<JournalAdapter.JournalViewHolder>() {
+    class CollectionAdapter(
+        private val collections: List<JournalCollection>,
+        private val onItemClick: (JournalCollection) -> Unit,
+        private val onDeleteClick: (JournalCollection) -> Unit
+    ) : RecyclerView.Adapter<CollectionAdapter.CollectionViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): JournalViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CollectionViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_journal_card, parent, false)
-            return JournalViewHolder(view, onItemClick, onDeleteClick)
+                .inflate(R.layout.item_collection_card, parent, false)
+            return CollectionViewHolder(view, onItemClick, onDeleteClick)
         }
 
-        override fun onBindViewHolder(holder: JournalViewHolder, position: Int) {
-            holder.bind(entries[position])
+        override fun onBindViewHolder(holder: CollectionViewHolder, position: Int) {
+            holder.bind(collections[position])
         }
 
-        override fun getItemCount() = entries.size
+        override fun getItemCount() = collections.size
 
-        class JournalViewHolder(
+        class CollectionViewHolder(
             itemView: View,
-            private val onItemClick: (JournalEntry) -> Unit,
-            private val onDeleteClick: (JournalEntry) -> Unit
+            private val onItemClick: (JournalCollection) -> Unit,
+            private val onDeleteClick: (JournalCollection) -> Unit
         ) : RecyclerView.ViewHolder(itemView) {
-            private val image = itemView.findViewById<ImageView>(R.id.journalImage)
-            private val name = itemView.findViewById<TextView>(R.id.cropNameText)
-            private val date = itemView.findViewById<TextView>(R.id.dateText)
-            private val notes = itemView.findViewById<TextView>(R.id.notesText)
-            private val deleteBtn = itemView.findViewById<ImageButton>(R.id.deleteButton)
-            private var currentEntry: JournalEntry? = null
+            private val title = itemView.findViewById<TextView>(R.id.collectionTitleText)
+            private val info = itemView.findViewById<TextView>(R.id.collectionInfoText)
+            private val deleteBtn = itemView.findViewById<ImageButton>(R.id.deleteCollectionButton)
+            private var currentCollection: JournalCollection? = null
 
             init {
                 itemView.setOnClickListener {
-                    currentEntry?.let { onItemClick(it) }
+                    currentCollection?.let { onItemClick(it) }
                 }
                 deleteBtn.setOnClickListener {
-                    currentEntry?.let { onDeleteClick(it) }
+                    currentCollection?.let { onDeleteClick(it) }
                 }
             }
 
-            fun bind(entry: JournalEntry) {
-                currentEntry = entry
-                name.text = entry.cropName.replaceFirstChar { it.uppercase() }
-                date.text = entry.date
-                notes.text = if (entry.notes.isNotEmpty()) entry.notes else "Documentations"
-
-                if (entry.imagePaths.isNotEmpty()) {
-                    val paths = entry.imagePaths.split(",")
-                    if (paths.isNotEmpty()) {
-                        val firstPath = paths[0]
-                        if (firstPath.isNotEmpty()) {
-                            val imgFile = File(firstPath)
-                            if (imgFile.exists()) {
-                                val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
-                                image.setImageBitmap(bitmap)
-                            }
-                        }
-                    }
-                }
+            fun bind(collection: JournalCollection) {
+                currentCollection = collection
+                title.text = collection.title
+                info.text = "Created: ${collection.date}"
             }
         }
     }

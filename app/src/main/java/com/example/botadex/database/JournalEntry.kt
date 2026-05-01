@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class JournalEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val collectionId: Int, // Link to JournalCollection
     val cropName: String,
     val notes: String,
     val date: String,

@@ -35,6 +35,7 @@ class AddJournalEntryActivity : AppCompatActivity() {
 
     private lateinit var db: BotadexDatabase
     private var journalId: Int = -1
+    private var targetCollectionId: Int = -1
     private val imagePaths = mutableListOf<String>()
 
     private lateinit var imagesRecyclerView: RecyclerView
@@ -85,6 +86,7 @@ class AddJournalEntryActivity : AppCompatActivity() {
         }
 
         journalId = intent.getIntExtra("JOURNAL_ID", -1)
+        targetCollectionId = intent.getIntExtra("COLLECTION_ID", -1)
         
         if (journalId != -1) {
             setupReadMode()
@@ -104,7 +106,6 @@ class AddJournalEntryActivity : AppCompatActivity() {
 
     private fun setupReadMode() {
         isEditMode = false
-        // Hide save button in read-only mode to disable editing
         saveButton.visibility = View.GONE
         
         cropNameEditText.isEnabled = false
@@ -153,8 +154,14 @@ class AddJournalEntryActivity : AppCompatActivity() {
             return
         }
 
+        if (targetCollectionId == -1) {
+            Toast.makeText(this, "Internal Error: No collection target", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val journalEntry = JournalEntry(
             id = 0,
+            collectionId = targetCollectionId,
             cropName = name,
             notes = notes,
             date = date,
@@ -164,6 +171,12 @@ class AddJournalEntryActivity : AppCompatActivity() {
         lifecycleScope.launch {
             db.cropDao().insertJournal(journalEntry)
             Toast.makeText(this@AddJournalEntryActivity, "Entry Saved", Toast.LENGTH_SHORT).show()
+            
+            // Redirect to the collection detail view
+            val intent = Intent(this@AddJournalEntryActivity, CollectionDetailActivity::class.java)
+            intent.putExtra("COLLECTION_ID", targetCollectionId)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            startActivity(intent)
             finish()
         }
     }

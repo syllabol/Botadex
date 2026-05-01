@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.room.Room
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     
     private var currentImagePath: String? = null
     private var currentCropName: String? = null
+    private var targetCollectionId: Int = -1
 
     private val REQUEST_IMAGE_CAPTURE = 1
     private val REQUEST_IMAGE_IMPORT = 2
@@ -51,6 +53,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        targetCollectionId = intent.getIntExtra("TARGET_COLLECTION_ID", -1)
 
         // Initialize layouts
         identifyLayout = findViewById(R.id.identifyLayout)
@@ -113,13 +117,43 @@ class MainActivity : AppCompatActivity() {
         }
 
         addToJournalButton.setOnClickListener {
-            val intent = Intent(this, AddJournalEntryActivity::class.java)
-            intent.putExtra("CROP_NAME", currentCropName)
-            intent.putExtra("IMAGE_PATH", currentImagePath)
-            startActivity(intent)
+            if (targetCollectionId == -1) {
+                // If not coming from a specific collection, prompt to select one or create one
+                showCollectionSelectionDialog()
+            } else {
+                startAddJournalActivity(targetCollectionId)
+            }
         }
         
         showIdentifyLayout()
+    }
+
+    private fun showCollectionSelectionDialog() {
+        lifecycleScope.launch {
+            val collections = db.cropDao().getAllCollections()
+            if (collections.isEmpty()) {
+                Toast.makeText(this@MainActivity, "Please create a collection in the Journal first", Toast.LENGTH_LONG).show()
+                startActivity(Intent(this@MainActivity, JournalActivity::class.java))
+                return@launch
+            }
+
+            val titles = collections.map { it.title }.toTypedArray()
+            AlertDialog.Builder(this@MainActivity)
+                .setTitle("Select Collection")
+                .setItems(titles) { _, which ->
+                    startAddJournalActivity(collections[which].id)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+    }
+
+    private fun startAddJournalActivity(collectionId: Int) {
+        val intent = Intent(this, AddJournalEntryActivity::class.java)
+        intent.putExtra("CROP_NAME", currentCropName)
+        intent.putExtra("IMAGE_PATH", currentImagePath)
+        intent.putExtra("COLLECTION_ID", collectionId)
+        startActivity(intent)
     }
 
     private fun showIdentifyLayout() {

@@ -16,37 +16,40 @@
             android:id="@+id/stageNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/bakbak_one"
+            android:text="1"
             android:textColor="#000000"
             android:textSize="32sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:text="1" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/stageTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:fontFamily="@font/bakbak_one"
+            android:text="Stage Name"
             android:textColor="#000000"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/stageNumber"
-            app:layout_constraintTop_toTopOf="parent"
-            android:text="Stage Name" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/stageDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/bakbak_one"
+            android:text="Description of the stage"
             android:textColor="#616161"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/stageTitle"
-            app:layout_constraintTop_toBottomOf="@id/stageTitle"
-            android:text="Description of the stage" />
+            app:layout_constraintTop_toBottomOf="@id/stageTitle" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

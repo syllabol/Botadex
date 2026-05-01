@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="yellow">#FFFF00</color>
     <color name="red">#FF0000</color>
+    <color name="botadex_green">#458C60</color>
     <color name="watering_border">#626AFB</color>
     <color name="fertilization_border">#A7A747</color>
     <color name="pest_control_border">#AE0C0C</color>

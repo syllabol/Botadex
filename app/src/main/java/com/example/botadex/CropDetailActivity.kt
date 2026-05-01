@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -74,7 +75,7 @@ class CropDetailActivity : AppCompatActivity() {
             textView.text = "● $characteristic"
             textView.setPadding(0, 4, 0, 4)
             textView.setTextColor(android.graphics.Color.BLACK)
-            textView.typeface = ResourcesCompat.getFont(this, R.font.jockey_one)
+            textView.typeface = ResourcesCompat.getFont(this, R.font.bakbak_one)
             container.addView(textView)
         }
     }
@@ -90,11 +91,42 @@ class CropDetailActivity : AppCompatActivity() {
 
     private fun setupCareGuide() {
         val view = LayoutInflater.from(this).inflate(R.layout.tab_care_guide, tabContentContainer, false)
-        view.findViewById<TextView>(R.id.wateringText).text = crop.watering
-        view.findViewById<TextView>(R.id.fertilizationText).text = crop.fertilization
-        view.findViewById<TextView>(R.id.pestControlText).text = crop.pestControl
-        view.findViewById<TextView>(R.id.harvestingText).text = crop.harvesting
+        
+        val wateringText = view.findViewById<TextView>(R.id.wateringText)
+        val fertilizationText = view.findViewById<TextView>(R.id.fertilizationText)
+        val pestControlText = view.findViewById<TextView>(R.id.pestControlText)
+        val harvestingText = view.findViewById<TextView>(R.id.harvestingText)
+
+        wateringText.text = crop.watering
+        fertilizationText.text = crop.fertilization
+        pestControlText.text = crop.pestControl
+        harvestingText.text = crop.harvesting
+
+        // Toggle logic for dropdowns
+        view.findViewById<View>(R.id.wateringHeader).setOnClickListener {
+            toggleSection(wateringText, view.findViewById(R.id.wateringArrow))
+        }
+        view.findViewById<View>(R.id.fertilizationHeader).setOnClickListener {
+            toggleSection(fertilizationText, view.findViewById(R.id.fertilizationArrow))
+        }
+        view.findViewById<View>(R.id.pestControlHeader).setOnClickListener {
+            toggleSection(pestControlText, view.findViewById(R.id.pestControlArrow))
+        }
+        view.findViewById<View>(R.id.harvestingHeader).setOnClickListener {
+            toggleSection(harvestingText, view.findViewById(R.id.harvestingArrow))
+        }
+
         tabContentContainer.addView(view)
+    }
+
+    private fun toggleSection(textView: TextView, arrow: ImageView) {
+        if (textView.visibility == View.VISIBLE) {
+            textView.visibility = View.GONE
+            arrow.rotation = 0f
+        } else {
+            textView.visibility = View.VISIBLE
+            arrow.rotation = 180f
+        }
     }
 
     private fun setupUses() {
@@ -107,7 +139,7 @@ class CropDetailActivity : AppCompatActivity() {
             textView.text = "● $use"
             textView.setPadding(0, 4, 0, 4)
             textView.setTextColor(android.graphics.Color.BLACK)
-            textView.typeface = ResourcesCompat.getFont(this, R.font.jockey_one)
+            textView.typeface = ResourcesCompat.getFont(this, R.font.bakbak_one)
             culinaryContainer.addView(textView)
         }
 
@@ -116,7 +148,7 @@ class CropDetailActivity : AppCompatActivity() {
             textView.text = "● $use"
             textView.setPadding(0, 4, 0, 4)
             textView.setTextColor(android.graphics.Color.BLACK)
-            textView.typeface = ResourcesCompat.getFont(this, R.font.jockey_one)
+            textView.typeface = ResourcesCompat.getFont(this, R.font.bakbak_one)
             medicinalContainer.addView(textView)
         }
         tabContentContainer.addView(view)
@@ -126,8 +158,7 @@ class CropDetailActivity : AppCompatActivity() {
         val view = LayoutInflater.from(this).inflate(R.layout.tab_growth_stages, tabContentContainer, false)
         val stagesContainer = view.findViewById<LinearLayout>(R.id.stagesContainer)
 
-        val jockeyFont = ResourcesCompat.getFont(this, R.font.jockey_one)
-        val interFont = ResourcesCompat.getFont(this, R.font.inter)
+        val jockeyFont = ResourcesCompat.getFont(this, R.font.bakbak_one)
 
         crop.growthStages?.forEachIndexed { index, stage ->
             val stageView = LayoutInflater.from(this).inflate(R.layout.item_growth_stage, stagesContainer, false)

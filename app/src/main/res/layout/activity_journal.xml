@@ -7,14 +7,12 @@
     android:background="#FFFFFF">
 
     <!-- Header Section -->
-
     <View
         android:id="@+id/headerBackground"
         android:layout_width="0dp"
         android:layout_height="120dp"
         android:background="#458C60"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,13 +31,13 @@
 
     <TextView
         android:id="@+id/titleText"
-        android:layout_width="210dp"
-        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="Plant Journal"
+        android:text="My Collections"
         android:textColor="#FFFFFF"
-        android:textSize="32sp"
-        android:textStyle="bold|italic"
+        android:textSize="28sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/backButton"
         app:layout_constraintStart_toEndOf="@id/backButton"
         app:layout_constraintTop_toTopOf="@id/backButton" />
@@ -49,14 +47,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Track your farming journey"
+        android:text="Organize your farming journey"
         android:textColor="#E0E0E0"
         android:textSize="14sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="@id/titleText"
         app:layout_constraintTop_toBottomOf="@id/titleText" />
 
-    <!-- RecyclerView for Journal Entries -->
+    <!-- RecyclerView for Collections -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/journalRecyclerView"
         android:layout_width="0dp"
@@ -67,7 +65,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/headerBackground"
-        tools:listitem="@layout/item_journal_card" />
+        tools:listitem="@layout/item_collection_card" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addCollectionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:src="@android:drawable/ic_input_add"
+        app:backgroundTint="#458C60"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="#FFFFFF"
+        android:contentDescription="Add New Collection" />
 
     <!-- Bottom Navigation -->
     <LinearLayout
@@ -85,21 +96,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_camera"
-                app:tint="#E0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Identify"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_camera" app:tint="#E0E0E0" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Identify" android:textColor="#E0E0E0" android:textSize="10sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -107,21 +109,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_library_books"
-                app:tint="#9AE0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Library"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_library_books" app:tint="#E0E0E0" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Library" android:textColor="#E0E0E0" android:textSize="10sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -129,23 +122,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:foreground="@android:drawable/ic_menu_edit"
-                android:foregroundTint="#FFFFFF"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="#FFFFFF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Journal"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_edit" app:tint="#FFFFFF" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Journal" android:textColor="#FFFFFF" android:textSize="10sp" />
         </LinearLayout>
 
         <LinearLayout
@@ -153,21 +135,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                app:tint="#E0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Calendar"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_my_calendar" app:tint="#E0E0E0" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calendar" android:textColor="#E0E0E0" android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
 

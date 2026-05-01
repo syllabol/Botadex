@@ -103,7 +103,7 @@
                 android:id="@+id/descriptionText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/jockey_one"
+                android:fontFamily="@font/bakbak_one"
                 android:textColor="#000000"
                 android:textSize="14sp"
                 tools:text="Crop description" />
@@ -112,7 +112,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:fontFamily="@font/jockey_one"
+                android:fontFamily="@font/bakbak_one"
                 android:text="Key Characteristics"
                 android:textColor="#000000"
                 android:textSize="20sp"

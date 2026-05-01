@@ -18,6 +18,15 @@ interface CropDao {
     @Query("SELECT * FROM journal")
     suspend fun getAllJournal(): List<JournalEntry>
 
+    @Query("SELECT * FROM journal WHERE collectionId = :collectionId")
+    suspend fun getJournalEntriesByCollection(collectionId: Int): List<JournalEntry>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCollection(collection: JournalCollection)
+
+    @Query("SELECT * FROM collections")
+    suspend fun getAllCollections(): List<JournalCollection>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReminder(reminder: Reminder)
 
@@ -29,4 +38,7 @@ interface CropDao {
 
     @Delete
     suspend fun deleteJournalEntry(entry: JournalEntry)
+
+    @Delete
+    suspend fun deleteCollection(collection: JournalCollection)
 }

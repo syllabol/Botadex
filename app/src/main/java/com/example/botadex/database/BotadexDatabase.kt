@@ -4,8 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [Crop::class, JournalEntry::class, Reminder::class],
-    version = 4,
+    entities = [Crop::class, JournalCollection::class, JournalEntry::class, Reminder::class],
+    version = 5,
     exportSchema = false
 )
 abstract class BotadexDatabase : RoomDatabase() {
