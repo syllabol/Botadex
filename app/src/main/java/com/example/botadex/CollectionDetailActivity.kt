@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.example.botadex.database.BotadexDatabase
 import com.example.botadex.database.JournalEntry
 import kotlinx.coroutines.launch
@@ -31,11 +30,7 @@ class CollectionDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_collection_detail)
 
-        db = Room.databaseBuilder(
-            applicationContext,
-            BotadexDatabase::class.java,
-            "botadex-db"
-        ).fallbackToDestructiveMigration().build()
+        db = BotadexDatabase.getDatabase(this)
 
         collectionId = intent.getIntExtra("COLLECTION_ID", -1)
         val title = intent.getStringExtra("COLLECTION_TITLE") ?: "Collection"
@@ -59,7 +54,7 @@ class CollectionDetailActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val entries = db.cropDao().getJournalEntriesByCollection(collectionId)
-                adapter = JournalAdapter(entries.toMutableList(), { entry ->
+                adapter = JournalAdapter(entries, { entry ->
                     val intent = Intent(this@CollectionDetailActivity, AddJournalEntryActivity::class.java)
                     intent.putExtra("JOURNAL_ID", entry.id)
                     startActivity(intent)

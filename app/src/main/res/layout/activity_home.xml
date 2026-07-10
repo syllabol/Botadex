@@ -4,351 +4,172 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F4F6F2">
 
-    <!-- Header Section -->
-    <View
-        android:id="@+id/headerBackground"
-        android:layout_width="0dp"
-        android:layout_height="220dp"
-        android:background="#458C60"
-        app:layout_constraintEnd_toEndOf="parent"
+    <!-- Header Section (Shifted up to remove status bar area) -->
+    <ImageView
+        android:id="@+id/logoCard"
+        android:layout_width="67dp"
+        android:layout_height="67dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="19dp"
+        android:src="@drawable/e7d623b1_4e86_4658_873a_dab9cc82653b"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Botadex Logo" />
+
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="107dp"
+        android:layout_marginTop="17dp"
+        android:fontFamily="@font/cal_sans"
+        android:text="Botadex"
+        android:textColor="#1F4D2E"
+        android:textSize="35sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/logoCard"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="32dp"
-        app:cardBackgroundColor="#2E7D32"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#33AC84"
-            android:foregroundGravity="center"
-            android:padding="12dp"
-            android:src="@drawable/_16acd6880ec0f7c1dda5ec7147a9ed18131df7e" />
-    </androidx.cardview.widget.CardView>
-
     <TextView
-        android:id="@+id/appName"
-        android:layout_width="220dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="16dp"
-        android:fontFamily="@font/inter"
-        android:text="Botadex"
-        android:textColor="#FFFFFF"
-        android:textSize="32sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintStart_toEndOf="@id/logoCard"
-        app:layout_constraintTop_toTopOf="@id/logoCard" />
-
-    <TextView
-        android:id="@+id/appTagline"
+        android:id="@+id/tvTagline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/inter"
+        android:layout_marginStart="108dp"
+        android:layout_marginTop="55dp"
+        android:fontFamily="@font/cormorant_sc_bold"
         android:text="Root Crop Companion"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="@id/appName"
-        app:layout_constraintTop_toBottomOf="@id/appName" />
+        android:textColor="#1D4D2E"
+        android:textSize="13sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/headerDescription"
-        android:layout_width="0dp"
+        android:layout_width="322dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
-        android:fontFamily="@font/inter"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="86dp"
+        android:fontFamily="@font/eb_garamond"
         android:text="Your smart farming assistance for identifying and growing healthy root crops"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logoCard" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Grid Menu -->
+    <!-- Swipeable Feature Cards -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/vpFeatures"
+        android:layout_width="match_parent"
+        android:layout_height="214dp"
+        android:layout_marginTop="165dp"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Offline Ready Section -->
-    <GridLayout
-        android:id="@+id/menuGrid"
-        android:layout_width="0dp"
+    <!-- Pagination Dots -->
+    <LinearLayout
+        android:id="@+id/llPagination"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="-50dp"
-        android:alignmentMode="alignMargins"
-        android:columnCount="2"
-        android:rowCount="2"
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerBackground">
+        app:layout_constraintTop_toBottomOf="@id/vpFeatures">
+        <!-- Dots will be added dynamically in HomeActivity -->
+    </LinearLayout>
 
-        <!-- Identify Plants -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardIdentify"
-            android:layout_width="0dp"
-            android:layout_height="160dp"
-            android:layout_rowWeight="1"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:cardBackgroundColor="#E0E0E0"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/_615ce736148756b16275556609962916eab026e" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Identify Plants"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="@font/jockey_one"
-                    android:text="Take a photo to identify crops"
-                    android:textColor="#616161"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Crop Library -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardLibrary"
-            android:layout_width="0dp"
-            android:layout_height="160dp"
-            android:layout_rowWeight="1"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:cardBackgroundColor="#E0E0E0"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ecd31dc6f5d96317638d02513295fd063fd5d2fe" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Crop Library"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="47dp"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="@font/jockey_one"
-                    android:text="Browse cultivation guides offline"
-                    android:textColor="#616161"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Track Growth -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardJournal"
-            android:layout_width="0dp"
-            android:layout_height="160dp"
-            android:layout_rowWeight="1"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:cardBackgroundColor="#E0E0E0"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/_0fc6acd3fb793f48b4717cb1bc7643f6a156492" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Track Growth"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="@font/jockey_one"
-                    android:text="Journal your farming journey"
-                    android:textColor="#616161"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Calendar & Reminders -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardCalendar"
-            android:layout_width="0dp"
-            android:layout_height="160dp"
-            android:layout_rowWeight="1"
-            android:layout_columnWeight="1"
-            android:layout_margin="8dp"
-            app:cardBackgroundColor="#E0E0E0"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="2dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/_8ac7348c19eb0fb9537e65f3333e940277a48be" />
-
-                <TextView
-                    android:layout_width="144dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Reminders"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="134dp"
-                    android:layout_height="55dp"
-                    android:layout_marginTop="4dp"
-                    android:fontFamily="@font/jockey_one"
-                    android:text="Never miss watering or harvesting time"
-                    android:textColor="#616161"
-                    android:textSize="11sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-    </GridLayout>
-
-    <androidx.cardview.widget.CardView
-        android:layout_width="0dp"
+    <!-- My Crops Header -->
+    <TextView
+        android:id="@+id/tvMyCropsLabel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="24dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
-        app:cardBackgroundColor="#E0E0E0"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="31dp"
+        android:layout_marginTop="25dp"
+        android:fontFamily="@font/instrument_sans"
+        android:text="My Crops"
+        android:textColor="#1F4D2E"
+        android:textSize="15sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/menuGrid">
+        app:layout_constraintTop_toBottomOf="@id/llPagination" />
+
+    <TextView
+        android:id="@+id/btnViewAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="31dp"
+        android:fontFamily="@font/instrument_sans"
+        android:text="View All"
+        android:textColor="#2E7D4A"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="@id/tvMyCropsLabel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvMyCropsLabel" />
+
+    <!-- My Crops List -->
+    <ScrollView
+        android:id="@+id/cropsScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginBottom="63dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvMyCropsLabel">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/offline_ready_border"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingBottom="80dp">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMyCrops"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/bakbak_one"
-                android:text="Offline Ready!"
-                android:textColor="#000000"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:fontFamily="@font/bakbak_one"
-                android:text="Botadex works offline! Once loaded, you can identify plants, access the library, and manage your journal even without internet connection. Perfect for remote farming areas."
-                android:textColor="#424242"
-                android:textSize="10sp" />
+                android:layout_marginTop="16dp"
+                android:nestedScrollingEnabled="true"
+                app:layout_constraintTop_toBottomOf="@id/filterTabsContainer"
+                tools:layout_editor_absoluteX="16dp"
+                tools:listitem="@layout/item_my_crop" />
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </ScrollView>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation Bar Area -->
+    <View
+        android:id="@+id/bottomNavBg"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:background="#4DD9D9D9"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
     <LinearLayout
         android:id="@+id/bottomNavigation"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#458C60"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
-            android:id="@+id/navIdentify"
+            android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_camera"
-                app:tint="#E0E0E0" />
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/home" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Identify"
-                android:textColor="#E0E0E0"
+                android:fontFamily="@font/inter"
+                android:text="Home"
+                android:textColor="#2E7D4A"
                 android:textSize="10sp" />
         </LinearLayout>
 
@@ -357,46 +178,48 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_library_books"
-                app:tint="#9AE0E0E0" />
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/libr" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
                 android:text="Library"
-                android:textColor="#E0E0E0"
+                android:textColor="#5B6B7D"
                 android:textSize="10sp" />
         </LinearLayout>
+
+        <!-- Placeholder for center FAB -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
         <LinearLayout
             android:id="@+id/navJournal"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="#E0E0E0" />
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/jour" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
                 android:text="Journal"
-                android:textColor="#E0E0E0"
+                android:textColor="#5B6B7D"
                 android:textSize="10sp" />
         </LinearLayout>
 
@@ -405,24 +228,42 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                app:tint="#E0E0E0" />
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/calendar" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
                 android:text="Calendar"
-                android:textColor="#E0E0E0"
+                android:textColor="#5B6B7D"
                 android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Floating Camera Button -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/navIdentify"
+        android:layout_width="74dp"
+        android:layout_height="73dp"
+        android:layout_marginBottom="15dp"
+        app:cardBackgroundColor="#2E7D4A"
+        app:cardCornerRadius="37dp"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="18dp"
+            android:src="@drawable/cam" />
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

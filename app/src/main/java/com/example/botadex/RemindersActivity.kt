@@ -1,87 +1,411 @@
 package com.example.botadex
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.content.ContentValues
+import android.content.ContentUris
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Typeface
 import android.os.Bundle
 import android.provider.CalendarContract
+import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.example.botadex.database.BotadexDatabase
 import com.example.botadex.database.Reminder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
 class RemindersActivity : AppCompatActivity() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: RemindersAdapter
+    private lateinit var todayRecyclerView: RecyclerView
+    private lateinit var upcomingRecyclerView: RecyclerView
+    private lateinit var noTodayRemindersText: TextView
+    private lateinit var noUpcomingRemindersText: TextView
+    private lateinit var todayAdapter: RemindersAdapter
+    private lateinit var upcomingAdapter: RemindersAdapter
     private lateinit var db: BotadexDatabase
+    private lateinit var nestedScrollView: NestedScrollView
+    
     private val calendar = Calendar.getInstance()
+    private val selectedDate = Calendar.getInstance()
+    private val today = Calendar.getInstance()
+
+    private lateinit var monthText: TextView
+    private lateinit var calendarGrid: TableLayout
+    private lateinit var todayLabel: TextView
+    
+    private val daysWithReminders = mutableSetOf<Int>() // Format: YYYYDDD
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reminders)
 
-        db = Room.databaseBuilder(
-            applicationContext,
-            BotadexDatabase::class.java,
-            "botadex-db"
-        ).fallbackToDestructiveMigration().build()
+        db = BotadexDatabase.getDatabase(this)
 
-        recyclerView = findViewById(R.id.remindersRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        monthText = findViewById(R.id.monthText)
+        calendarGrid = findViewById(R.id.calendarGrid)
+        todayLabel = findViewById(R.id.todayLabel)
+        nestedScrollView = findViewById(R.id.nestedScrollView)
+        
+        noTodayRemindersText = findViewById(R.id.noTodayRemindersText)
+        noUpcomingRemindersText = findViewById(R.id.noUpcomingRemindersText)
+        
+        todayRecyclerView = findViewById(R.id.todayRecyclerView)
+        todayRecyclerView.layoutManager = LinearLayoutManager(this)
+        
+        upcomingRecyclerView = findViewById(R.id.upcomingRecyclerView)
+        upcomingRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        updateMonthYearDisplay()
+        
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CALENDAR), 100)
+        } else {
+            fetchDaysWithReminders()
+        }
 
         findViewById<View>(R.id.backButton).setOnClickListener { finish() }
-        
-        findViewById<View>(R.id.addReminderButton).setOnClickListener {
-            showAddReminderDialog()
+
+        findViewById<View>(R.id.calendarTitle).setOnLongClickListener {
+            calendar.time = Date()
+            selectedDate.time = Date()
+            updateMonthYearDisplay()
+            fetchDaysWithReminders()
+            loadRemindersForSelectedDay()
+            nestedScrollView.smoothScrollTo(0, 0)
+            true
         }
 
-        // Bottom Navigation
-        findViewById<View>(R.id.navIdentify).setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
+        findViewById<View>(R.id.prevMonth).setOnClickListener {
+            calendar.add(Calendar.MONTH, -1)
+            updateMonthYearDisplay()
+            fetchDaysWithReminders()
         }
-        findViewById<View>(R.id.navLibrary).setOnClickListener {
-            startActivity(Intent(this, CropLibraryActivity::class.java))
-        }
-        findViewById<View>(R.id.navJournal).setOnClickListener {
-            startActivity(Intent(this, JournalActivity::class.java))
-        }
-        // navCalendar is current activity
 
-        loadReminders()
+        findViewById<View>(R.id.nextMonth).setOnClickListener {
+            calendar.add(Calendar.MONTH, 1)
+            updateMonthYearDisplay()
+            fetchDaysWithReminders()
+        }
+
+        findViewById<View>(R.id.navHome).setOnClickListener {
+            val intent = Intent(this, HomeActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            startActivity(intent) }
+        findViewById<View>(R.id.navIdentify).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+        findViewById<View>(R.id.navLibrary).setOnClickListener { startActivity(Intent(this, CropLibraryActivity::class.java)) }
+        findViewById<View>(R.id.navJournal).setOnClickListener { startActivity(Intent(this, JournalActivity::class.java)) }
+        findViewById<View>(R.id.navCalendar).setOnClickListener { nestedScrollView.smoothScrollTo(0, 0) }
+
+        loadRemindersForSelectedDay()
+        loadUpcomingReminders()
     }
 
-    private fun loadReminders() {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        fetchDaysWithReminders()
+        loadRemindersForSelectedDay()
+    }
+
+    private fun updateMonthYearDisplay() {
+        val format = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+        monthText.text = format.format(calendar.time)
+    }
+
+    private fun fetchDaysWithReminders() {
+        val startCal = calendar.clone() as Calendar
+        startCal.set(Calendar.DAY_OF_MONTH, 1)
+        startCal.add(Calendar.DAY_OF_MONTH, -7)
+        startCal.set(Calendar.HOUR_OF_DAY, 0)
+        
+        val endCal = calendar.clone() as Calendar
+        endCal.set(Calendar.DAY_OF_MONTH, endCal.getActualMaximum(Calendar.DAY_OF_MONTH))
+        endCal.add(Calendar.DAY_OF_MONTH, 7)
+        endCal.set(Calendar.HOUR_OF_DAY, 23)
+
         lifecycleScope.launch {
-            val reminders = db.cropDao().getAllReminders()
-            adapter = RemindersAdapter(reminders)
-            recyclerView.adapter = adapter
+            val appReminders = db.cropDao().getRemindersInRange(startCal.timeInMillis, endCal.timeInMillis)
+            daysWithReminders.clear()
+            val cal = Calendar.getInstance()
+            appReminders.forEach {
+                cal.timeInMillis = it.timestamp
+                daysWithReminders.add(cal.get(Calendar.YEAR) * 1000 + cal.get(Calendar.DAY_OF_YEAR))
+            }
+
+            if (ContextCompat.checkSelfPermission(this@RemindersActivity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                val phoneCalendarDays = withContext(Dispatchers.IO) {
+                    getPhoneCalendarEventDays(startCal.timeInMillis, endCal.timeInMillis)
+                }
+                daysWithReminders.addAll(phoneCalendarDays)
+            }
+
+            populateCalendar()
         }
+    }
+
+    private fun getPhoneCalendarEventDays(startMillis: Long, endMillis: Long): List<Int> {
+        val eventDays = mutableListOf<Int>()
+        val projection = arrayOf(CalendarContract.Instances.BEGIN)
+        val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
+        ContentUris.appendId(builder, startMillis)
+        ContentUris.appendId(builder, endMillis)
+
+        val cursor = contentResolver.query(builder.build(), projection, null, null, null)
+        cursor?.use {
+            val cal = Calendar.getInstance()
+            while (it.moveToNext()) {
+                val begin = it.getLong(0)
+                cal.timeInMillis = begin
+                eventDays.add(cal.get(Calendar.YEAR) * 1000 + cal.get(Calendar.DAY_OF_YEAR))
+            }
+        }
+        return eventDays
+    }
+
+    private fun getPhoneEventsForDay(dateMillis: Long): List<Reminder> {
+        val reminders = mutableListOf<Reminder>()
+        val projection = arrayOf(CalendarContract.Instances.TITLE, CalendarContract.Instances.BEGIN)
+        
+        val startOfDay = Calendar.getInstance().apply {
+            timeInMillis = dateMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        
+        val endOfDay = Calendar.getInstance().apply {
+            timeInMillis = dateMillis
+            set(Calendar.HOUR_OF_DAY, 23)
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }.timeInMillis
+
+        val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
+        ContentUris.appendId(builder, startOfDay)
+        ContentUris.appendId(builder, endOfDay)
+
+        val cursor = contentResolver.query(builder.build(), projection, null, null, null)
+        cursor?.use {
+            val titleIdx = it.getColumnIndex(CalendarContract.Instances.TITLE)
+            val beginIdx = it.getColumnIndex(CalendarContract.Instances.BEGIN)
+            val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+            val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+            
+            while (it.moveToNext()) {
+                val title = it.getString(titleIdx) ?: "Event"
+                val begin = it.getLong(beginIdx)
+                val cal = Calendar.getInstance().apply { timeInMillis = begin }
+                
+                reminders.add(Reminder(
+                    cropName = title,
+                    taskType = "Calendar Event",
+                    date = dateFormat.format(cal.time),
+                    time = timeFormat.format(cal.time),
+                    timestamp = begin,
+                    isCompleted = false
+                ))
+            }
+        }
+        return reminders
+    }
+
+    private fun populateCalendar() {
+        if (calendarGrid.childCount > 1) {
+            calendarGrid.removeViews(1, calendarGrid.childCount - 1)
+        }
+
+        val tempCal = calendar.clone() as Calendar
+        tempCal.set(Calendar.DAY_OF_MONTH, 1)
+        val firstDayOfWeek = tempCal.get(Calendar.DAY_OF_WEEK) - 1
+        tempCal.add(Calendar.DAY_OF_MONTH, -firstDayOfWeek)
+
+        for (i in 0 until 6) {
+            val tableRow = TableRow(this).apply {
+                layoutParams = TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT).apply {
+                    topMargin = (13 * resources.displayMetrics.density).toInt()
+                }
+                gravity = Gravity.CENTER
+            }
+
+            for (j in 0 until 7) {
+                tableRow.addView(createDayView(tempCal))
+                tempCal.add(Calendar.DAY_OF_MONTH, 1)
+            }
+            calendarGrid.addView(tableRow)
+            if (tempCal.get(Calendar.MONTH) != calendar.get(Calendar.MONTH) && i >= 4) break
+        }
+    }
+
+    private fun createDayView(dayCal: Calendar): View {
+        val outValue = TypedValue()
+        theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
+
+        val container = LinearLayout(this).apply {
+            layoutParams = TableRow.LayoutParams(0, (40 * resources.displayMetrics.density).toInt(), 1f)
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setBackgroundResource(outValue.resourceId)
+            isClickable = true
+            isFocusable = true
+        }
+
+        val textView = TextView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                (35 * resources.displayMetrics.density).toInt(),
+                (24 * resources.displayMetrics.density).toInt()
+            )
+            gravity = Gravity.CENTER
+            text = dayCal.get(Calendar.DAY_OF_MONTH).toString()
+            textSize = 14f
+            typeface = ResourcesCompat.getFont(this@RemindersActivity, R.font.instrument_sans)
+        }
+
+        val isToday = isSameDay(dayCal, today)
+        val isSelected = isSameDay(dayCal, selectedDate)
+        val isCurrentMonth = dayCal.get(Calendar.MONTH) == calendar.get(Calendar.MONTH)
+        val dayKey = dayCal.get(Calendar.YEAR) * 1000 + dayCal.get(Calendar.DAY_OF_YEAR)
+        val hasReminder = daysWithReminders.contains(dayKey)
+
+        if (isSelected) {
+            textView.setBackgroundResource(R.drawable.rounded_green_button)
+            textView.backgroundTintList = ContextCompat.getColorStateList(this, R.color.primary_green)
+            textView.setTextColor(Color.WHITE)
+        } else {
+            textView.background = null
+            if (isToday) {
+                textView.setTextColor(Color.parseColor("#2E7D4A"))
+                textView.setTypeface(textView.typeface, Typeface.BOLD)
+            } else if (isCurrentMonth) {
+                textView.setTextColor(Color.BLACK)
+            } else {
+                textView.setTextColor(Color.parseColor("#BEC2C7"))
+            }
+        }
+
+        container.addView(textView)
+
+        if (hasReminder && isCurrentMonth) {
+            val dot = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams((4 * resources.displayMetrics.density).toInt(), (4 * resources.displayMetrics.density).toInt()).apply { topMargin = (2 * resources.displayMetrics.density).toInt() }
+                setBackgroundResource(R.drawable.circle_white_bg)
+                backgroundTintList = ContextCompat.getColorStateList(this@RemindersActivity, R.color.primary_green)
+            }
+            container.addView(dot)
+        }
+
+        val dayTime = dayCal.timeInMillis
+        container.setOnClickListener {
+            selectedDate.timeInMillis = dayTime
+            populateCalendar()
+            loadRemindersForSelectedDay()
+        }
+        container.setOnLongClickListener {
+            selectedDate.timeInMillis = dayTime
+            showAddReminderDialog()
+            true
+        }
+
+        return container
+    }
+
+    private fun isSameDay(cal1: Calendar, cal2: Calendar): Boolean =
+        cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
+
+    private fun loadRemindersForSelectedDay() {
+        val isToday = isSameDay(selectedDate, today)
+        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+        val dateString = dateFormat.format(selectedDate.time)
+        
+        todayLabel.text = if (isToday) getString(R.string.reminders_for_today) else getString(R.string.reminders_for_date, dateString)
+
+        lifecycleScope.launch {
+            val appReminders = db.cropDao().getRemindersForDay(dateString)
+            val phoneReminders = if (ContextCompat.checkSelfPermission(this@RemindersActivity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
+                withContext(Dispatchers.IO) { getPhoneEventsForDay(selectedDate.timeInMillis) }
+            } else emptyList()
+            
+            val allReminders = (appReminders + phoneReminders).sortedBy { it.timestamp }
+
+            if (allReminders.isNotEmpty()) {
+                noTodayRemindersText.visibility = View.GONE
+                todayRecyclerView.visibility = View.VISIBLE
+                todayAdapter = RemindersAdapter(allReminders, false, { r, c -> toggleReminder(r, c) }, { deleteReminder(it) })
+                todayRecyclerView.adapter = todayAdapter
+            } else {
+                noTodayRemindersText.visibility = View.VISIBLE
+                todayRecyclerView.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun loadUpcomingReminders() {
+        lifecycleScope.launch {
+            val upcoming = db.cropDao().getUpcomingReminders(System.currentTimeMillis())
+            if (upcoming.isNotEmpty()) {
+                noUpcomingRemindersText.visibility = View.GONE
+                upcomingRecyclerView.visibility = View.VISIBLE
+                upcomingAdapter = RemindersAdapter(upcoming, true, { r, c -> toggleReminder(r, c) }, { deleteReminder(it) })
+                upcomingRecyclerView.adapter = upcomingAdapter
+            } else {
+                noUpcomingRemindersText.visibility = View.VISIBLE
+                upcomingRecyclerView.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun toggleReminder(reminder: Reminder, isChecked: Boolean) {
+        if (reminder.taskType == "Calendar Event") return
+        lifecycleScope.launch {
+            db.cropDao().insertReminder(reminder.copy(isCompleted = isChecked))
+            loadRemindersForSelectedDay()
+            loadUpcomingReminders()
+        }
+    }
+
+    private fun deleteReminder(reminder: Reminder) {
+        if (reminder.taskType == "Calendar Event") return
+        AlertDialog.Builder(this)
+            .setTitle(R.string.delete_reminder_title)
+            .setMessage(getString(R.string.delete_reminder_msg, reminder.cropName))
+            .setPositiveButton("Delete") { _, _ ->
+                lifecycleScope.launch {
+                    db.cropDao().deleteReminder(reminder)
+                    fetchDaysWithReminders()
+                    loadRemindersForSelectedDay()
+                    loadUpcomingReminders()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun loadCropNames(): List<String> {
         return try {
-            val jsonString = assets.open("crop_library.json")
-                .bufferedReader()
-                .use { it.readText() }
-
-            val type = object : TypeToken<Map<String, CropInfo>>() {}.type
-            val map: Map<String, CropInfo> = Gson().fromJson(jsonString, type)
-            
+            val jsonString = assets.open("crop_library.json").bufferedReader().use { it.readText() }
+            val map: Map<String, CropInfo> = Gson().fromJson(jsonString, object : TypeToken<Map<String, CropInfo>>() {}.type)
             map.keys.map { it.replaceFirstChar { char -> char.uppercase() } }.sorted()
         } catch (e: Exception) {
             listOf("Cassava", "Kamote", "Onion", "Potato", "Tomato")
@@ -96,87 +420,73 @@ class RemindersActivity : AppCompatActivity() {
         val editTime = dialogView.findViewById<EditText>(R.id.editTime)
         val btnSave = dialogView.findViewById<Button>(R.id.btnSave)
 
-        // Setup Crop Spinner
-        val cropNames = loadCropNames()
-        val adapterCrops = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, cropNames)
-        spinnerCropName.adapter = adapterCrops
+        val tempCalendar = selectedDate.clone() as Calendar
+        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+        
+        editDate.setText(dateFormat.format(tempCalendar.time))
+        editTime.setText(timeFormat.format(tempCalendar.time))
 
-        // Setup Task Spinner
-        val tasks = arrayOf("Water plants", "Apply fertilizer", "Harvest")
-        val adapterSpinner = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, tasks)
-        spinnerTask.adapter = adapterSpinner
-
-        val dateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, month)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            val format = SimpleDateFormat("MMMM dd", Locale.getDefault())
-            editDate.setText(format.format(calendar.time))
-        }
+        spinnerCropName.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, loadCropNames())
+        spinnerTask.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayOf("Watering", "Fertilizing", "Pest Control", "Harvesting"))
 
         editDate.setOnClickListener {
-            DatePickerDialog(this, dateSetListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+            DatePickerDialog(this, { _, y, m, d ->
+                tempCalendar.set(y, m, d)
+                editDate.setText(dateFormat.format(tempCalendar.time))
+            }, tempCalendar.get(Calendar.YEAR), tempCalendar.get(Calendar.MONTH), tempCalendar.get(Calendar.DAY_OF_MONTH)).show()
         }
-
-        val timeSetListener = TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
-            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-            calendar.set(Calendar.MINUTE, minute)
-            val format = SimpleDateFormat("h:mm a", Locale.getDefault())
-            editTime.setText(format.format(calendar.time))
-        }
-
         editTime.setOnClickListener {
-            TimePickerDialog(this, timeSetListener, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show()
+            TimePickerDialog(this, { _, h, min ->
+                tempCalendar.set(Calendar.HOUR_OF_DAY, h)
+                tempCalendar.set(Calendar.MINUTE, min)
+                editTime.setText(timeFormat.format(tempCalendar.time))
+            }, tempCalendar.get(Calendar.HOUR_OF_DAY), tempCalendar.get(Calendar.MINUTE), false).show()
         }
 
-        val alertDialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .create()
-
+        val alertDialog = AlertDialog.Builder(this).setView(dialogView).create()
         btnSave.setOnClickListener {
-            val cropName = spinnerCropName.selectedItem.toString()
-            val task = spinnerTask.selectedItem.toString()
-            val dateStr = editDate.text.toString()
-            val timeStr = editTime.text.toString()
-
-            if (dateStr.isEmpty() || timeStr.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val reminder = Reminder(cropName = cropName, taskType = task, date = dateStr, time = timeStr)
+            val reminder = Reminder(
+                cropName = spinnerCropName.selectedItem.toString(),
+                taskType = spinnerTask.selectedItem.toString(),
+                date = editDate.text.toString(),
+                time = editTime.text.toString(),
+                timestamp = tempCalendar.timeInMillis
+            )
             lifecycleScope.launch {
                 db.cropDao().insertReminder(reminder)
-                syncToCalendar(cropName, task)
-                loadReminders()
+                fetchDaysWithReminders()
+                loadRemindersForSelectedDay()
+                loadUpcomingReminders()
                 alertDialog.dismiss()
             }
         }
-
         alertDialog.show()
     }
 
-    private fun syncToCalendar(cropName: String, task: String) {
-        val intent = Intent(Intent.ACTION_INSERT)
-            .setData(CalendarContract.Events.CONTENT_URI)
-            .putExtra(CalendarContract.Events.TITLE, "$task: $cropName")
-            .putExtra(CalendarContract.Events.DESCRIPTION, "Botadex Farming Reminder")
-            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, calendar.timeInMillis)
-            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, calendar.timeInMillis + 60 * 60 * 1000)
-        startActivity(intent)
-    }
-
-    class RemindersAdapter(private val reminders: List<Reminder>) :
-        RecyclerView.Adapter<RemindersAdapter.ReminderViewHolder>() {
+    class RemindersAdapter(
+        private val reminders: List<Reminder>,
+        private val showDate: Boolean,
+        private val onToggle: (Reminder, Boolean) -> Unit,
+        private val onDelete: (Reminder) -> Unit
+    ) : RecyclerView.Adapter<RemindersAdapter.ReminderViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReminderViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.item_reminder_card, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_reminder_card, parent, false)
             return ReminderViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: ReminderViewHolder, position: Int) {
-            holder.bind(reminders[position])
+            val reminder = reminders[position]
+            holder.bind(reminder, showDate, onToggle)
+            if (reminder.taskType != "Calendar Event") {
+                holder.itemView.setOnLongClickListener {
+                    onDelete(reminder)
+                    true
+                }
+            } else {
+                holder.itemView.setOnLongClickListener(null)
+            }
         }
 
         override fun getItemCount() = reminders.size
@@ -186,26 +496,43 @@ class RemindersActivity : AppCompatActivity() {
             private val task = itemView.findViewById<TextView>(R.id.taskTypeText)
             private val dateTime = itemView.findViewById<TextView>(R.id.dateTimeText)
             private val icon = itemView.findViewById<ImageView>(R.id.taskIcon)
+            private val checkbox = itemView.findViewById<CheckBox>(R.id.reminderCheckbox)
 
-            fun bind(reminder: Reminder) {
+            fun bind(reminder: Reminder, showDate: Boolean, onToggle: (Reminder, Boolean) -> Unit) {
                 name.text = reminder.cropName
                 task.text = reminder.taskType
-                dateTime.text = "${reminder.date}  at  ${reminder.time}"
+                dateTime.text = if (showDate) "${reminder.date}\n${reminder.time}" else reminder.time
                 
-                when {
-                    reminder.taskType.contains("Water", ignoreCase = true) -> {
-                        icon.setImageResource(R.drawable._aa81a892985725a915157479d7c0b4d7bbefcf2) // Placeholder
+                checkbox.setOnCheckedChangeListener(null)
+                checkbox.isChecked = reminder.isCompleted
+                
+                if (reminder.taskType == "Calendar Event") {
+                    checkbox.visibility = View.GONE
+                    name.paintFlags = name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                    name.setTextColor(Color.parseColor("#1F4D2E"))
+                    task.setTextColor(Color.BLACK)
+                } else {
+                    checkbox.visibility = View.VISIBLE
+                    if (reminder.isCompleted) {
+                        name.paintFlags = name.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                        name.setTextColor(Color.GRAY)
+                        task.setTextColor(Color.GRAY)
+                    } else {
+                        name.paintFlags = name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                        name.setTextColor(Color.parseColor("#1F4D2E"))
+                        task.setTextColor(Color.BLACK)
                     }
-                    reminder.taskType.contains("Fertilizer", ignoreCase = true) -> {
-                        icon.setImageResource(R.drawable.d8f3fd12ec12732af9a1fce41011dc460746599a)
-                    }
-                    reminder.taskType.contains("Harvest", ignoreCase = true) -> {
-                        icon.setImageResource(R.drawable.w90a89e78afoasjdoa79sd3)
-                    }
-                    else -> {
-                        icon.setImageResource(android.R.drawable.ic_menu_today) // Placeholder
-                    }
+                    checkbox.setOnCheckedChangeListener { _, isChecked -> onToggle(reminder, isChecked) }
                 }
+
+                val iconRes = when {
+                    reminder.taskType.contains("Water", true) -> R.drawable.ic_watering
+                    reminder.taskType.contains("Fertiliz", true) -> R.drawable.ic_fertilizing
+                    reminder.taskType.contains("Harvest", true) -> R.drawable.ic_harvesting
+                    reminder.taskType.contains("Pest", true) -> R.drawable.ic_pest_control
+                    else -> android.R.drawable.ic_menu_today
+                }
+                icon.setImageResource(iconRes)
             }
         }
     }

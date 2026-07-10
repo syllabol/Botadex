@@ -24,5 +24,12 @@ data class CropInfo(
 
 data class GrowthStage(
     val stage: String,
-    val description: String
+    val description: String,
+    val dayRange: String? = null
+)
+
+data class DetailItem(
+    val title: String,
+    val description: String,
+    val iconRes: Int? = null
 )

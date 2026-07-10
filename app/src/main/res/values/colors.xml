@@ -1,17 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="brand_green">#2E7D4A</color>
+    <color name="primary_green">#2E7D4A</color>
+    <color name="nav_inactive">#5B6B7D</color>
+    <color name="line_inactive">#1A000000</color>
+    <color name="background_light">#F4F6F2</color>
+    <color name="text_green_dark">#1F4D2E</color>
+    <color name="progress_green">#7BAF6F</color>
+    <color name="placeholder_gray">#D9D9D9</color>
+    <color name="bg_green_light">#E9F1E3</color> <!-- Approx rgba(217, 232, 201, 0.4) -->
+    <color name="tab_bg">#E9F1E3</color>
+
+    <!-- Status Chip Backgrounds (50% Alpha) -->
+    <color name="status_growing_bg">#807BAF6F</color>
+    <color name="status_harvested_bg">#805769B1</color>
+    <color name="status_attention_bg">#80F6A623</color>
+    <color name="status_warning_bg">#80FF8A65</color>
+    <color name="status_healthy_bg">#807BAF6F</color>
+    <color name="status_archived_bg">#80D9D9D9</color>
+
+    <!-- Status Chip Texts -->
+    <color name="status_growing_text">#2E7D4A</color>
+    <color name="status_harvested_text">#4558A6</color>
+    <color name="status_attention_text">#CF8C1E</color>
+    <color name="status_warning_text">#C0674B</color>
+    <color name="status_healthy_text">#2E7D4A</color>
+
+    <!-- Material theme colors -->
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
     <color name="yellow">#FFFF00</color>
     <color name="red">#FF0000</color>
-    <color name="botadex_green">#458C60</color>
-    <color name="watering_border">#626AFB</color>
-    <color name="fertilization_border">#A7A747</color>
-    <color name="pest_control_border">#AE0C0C</color>
-    <color name="harvesting_border">#15CF04</color>
 </resources>

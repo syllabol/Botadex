@@ -11,5 +11,7 @@ data class JournalEntry(
     val cropName: String,
     val notes: String,
     val date: String,
-    val imagePaths: String // Comma-separated list of image paths
+    val imagePaths: String, // Comma-separated list of image paths
+    val dayCount: Int = 0,
+    val timestamp: Long = System.currentTimeMillis()
 )

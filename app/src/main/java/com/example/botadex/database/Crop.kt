@@ -5,10 +5,15 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "crops")
 data class Crop(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val name: String,
+    @PrimaryKey val name: String,
+    val scientificName: String? = null,
     val description: String,
-    val wateringSchedule: String,
-    val fertilizerInfo: String
+    val watering: String,
+    val fertilization: String,
+    val pestControl: String,
+    val uses: String,
+    val characteristics: List<String> = emptyList(),
+    val culinaryUses: List<String> = emptyList(),
+    val medicinalUses: List<String> = emptyList(),
+    val harvesting: String? = null
 )

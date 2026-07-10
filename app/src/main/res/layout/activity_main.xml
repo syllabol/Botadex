@@ -4,399 +4,412 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F4F6F2">
 
-    <!-- Header Section -->
-    <View
-        android:id="@+id/headerBackground"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="#458C60"
+    <!-- Chevron Backward -->
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/arrow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#1D1B20"
+        android:contentDescription="Back" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvIdentifyTitleHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/instrument_sans"
+        android:text="Identify Crop"
+        android:textColor="#1F4D2E"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/backButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
-        android:src="@drawable/abc_ic_ab_back_material"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="#FFFFFF" />
-
+    <!-- Subtitle -->
     <TextView
-        android:id="@+id/titleText"
-        android:layout_width="220dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:text="Identify Plant"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintBottom_toBottomOf="@id/backButton"
-        app:layout_constraintStart_toEndOf="@id/backButton"
-        app:layout_constraintTop_toTopOf="@id/backButton" />
-
-    <ImageView
-        android:id="@+id/homeIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_home"
-        app:layout_constraintBottom_toBottomOf="@id/titleText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/titleText"
-        app:tint="#FFFFFF" />
-
-    <TextView
-        android:id="@+id/subtitleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:id="@+id/tvSubtitle"
+        android:layout_width="262dp"
+        android:layout_height="95dp"
+        android:layout_marginStart="39dp"
+        android:layout_marginTop="69dp"
+        android:fontFamily="@font/eb_garamond"
+        android:lineSpacingExtra="5dp"
         android:text="Take or upload photos of their leaves"
-        android:textColor="#E0E0E0"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        app:layout_constraintStart_toStartOf="@id/titleText"
-        app:layout_constraintTop_toBottomOf="@id/titleText" />
+        android:textColor="#000000"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Identify State Layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/identifyLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="visible"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerBackground">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
+        <!-- Camera Area Card -->
         <androidx.cardview.widget.CardView
             android:id="@+id/initialImageCard"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginVertical="24dp"
-            app:cardBackgroundColor="#12182B"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:layout_constraintBottom_toTopOf="@id/captureButton"
+            android:layout_width="325dp"
+            android:layout_height="400dp"
+            android:layout_marginTop="184dp"
+            app:cardBackgroundColor="#D9D9D9"
+            app:cardCornerRadius="30dp"
+            app:cardElevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/imageViewInitial"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
+                android:layout_height="match_parent">
+
+                <androidx.camera.view.PreviewView
+                    android:id="@+id/viewFinder"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:scaleType="fillCenter" />
+
+                <ImageView
+                    android:id="@+id/imageViewInitial"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Captured Image Preview"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+
+                <!-- Internal Capture Trigger -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/captureButton"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginBottom="23dp"
+                    app:cardBackgroundColor="#2E7D4A"
+                    app:cardCornerRadius="40dp"
+                    app:cardElevation="4dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="20dp"
+                        android:src="@drawable/cam"
+                        android:contentDescription="Capture" />
+                </androidx.cardview.widget.CardView>
+
+                <!-- Gallery and Flash buttons -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/importButton"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="52dp"
+                    android:layout_marginBottom="38dp"
+                    app:cardBackgroundColor="#F4F6F2"
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="2dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="12dp"
+                        android:src="@drawable/gallery"
+                        android:contentDescription="Gallery" />
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/btnFlash"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="52dp"
+                    android:layout_marginBottom="38dp"
+                    app:cardBackgroundColor="#F4F6F2"
+                    app:cardCornerRadius="25dp"
+                    app:cardElevation="2dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="12dp"
+                        android:src="@drawable/flash"
+                        android:contentDescription="Flash" />
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
-        <Button
-            android:id="@+id/captureButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginBottom="12dp"
-            android:backgroundTint="#17A25D"
-            android:drawableStart="@android:drawable/ic_menu_camera"
-            android:drawablePadding="8dp"
-            android:fontFamily="@font/bakbak_one"
-            android:paddingStart="24dp"
-            android:text="Take Photo"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            app:cornerRadius="12dp"
-            app:layout_constraintBottom_toTopOf="@id/importButton"
+        <!-- Tips Area -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/tipsCard"
+            android:layout_width="325dp"
+            android:layout_height="110dp"
+            android:layout_marginTop="598dp"
+            app:cardBackgroundColor="#337BAF6F"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/importButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginBottom="32dp"
-            android:backgroundTint="#E0E0E0"
-            android:drawableStart="@android:drawable/stat_sys_upload"
-            android:drawablePadding="8dp"
-            android:fontFamily="@font/bakbak_one"
-            android:paddingStart="24dp"
-            android:text="Upload Photo"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            app:cornerRadius="12dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingStart="53dp"
+                android:paddingEnd="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/instrument_sans"
+                    android:lineSpacingExtra="15dp"
+                    android:text="Use good lighting\nShow the whole leaf\nTake a clear image"
+                    android:textColor="#B3000000"
+                    android:textSize="15sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Result State Layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/resultLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerBackground">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/resultImageCard"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            app:cardBackgroundColor="#12182B"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            android:layout_width="325dp"
+            android:layout_height="325dp"
+            android:layout_marginTop="184dp"
+            app:cardCornerRadius="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
             <ImageView
                 android:id="@+id/imageViewResult"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:contentDescription="Result Image" />
         </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/cropNameText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="24dp"
-            android:fontFamily="@font/bakbak_one"
-            android:textColor="#000000"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/resultImageCard"
-            app:layout_constraintTop_toTopOf="@id/resultImageCard"
-            tools:text="Crop Name" />
-
-        <TextView
-            android:id="@+id/scientificNameText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="@id/cropNameText"
-            app:layout_constraintStart_toStartOf="@id/cropNameText"
-            app:layout_constraintTop_toBottomOf="@id/cropNameText"
-            tools:text="Scientific name" />
-
-        <TextView
-            android:id="@+id/confidenceText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="@id/cropNameText"
-            app:layout_constraintStart_toStartOf="@id/cropNameText"
-            app:layout_constraintTop_toBottomOf="@id/scientificNameText"
-            tools:text="100%" />
-
-        <TextView
-            android:id="@+id/descriptionLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:fontFamily="@font/bakbak_one"
-            android:text="Description"
-            android:textColor="#000000"
+            android:fontFamily="@font/instrument_sans"
+            android:textColor="#1F4D2E"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/resultImageCard"
+            tools:text="Kamote" />
+
+        <TextView
+            android:id="@+id/scientificNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/instrument_sans"
+            android:textColor="#9A000000"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cropNameText"
+            tools:text="Ipomoea batatas" />
+
+        <TextView
+            android:id="@+id/confidenceText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="#2E7D4A"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/resultImageCard"
-            app:layout_constraintTop_toBottomOf="@id/resultImageCard" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/scientificNameText"
+            tools:text="98%" />
 
         <TextView
             android:id="@+id/descriptionText"
-            android:layout_width="0dp"
+            android:layout_width="325dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="24dp"
-            android:fontFamily="@font/bakbak_one"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/instrument_sans"
+            android:gravity="center"
             android:textColor="#000000"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/descriptionLabel"
-            app:layout_constraintTop_toBottomOf="@id/descriptionLabel"
-            tools:text="Crop description goes here..." />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/confidenceText"
+            tools:text="Crop description here..." />
 
-        <Button
-            android:id="@+id/addToJournalButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginBottom="12dp"
-            android:backgroundTint="#17A25D"
-            android:fontFamily="@font/bakbak_one"
-            android:text="Add to Journal"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            app:layout_constraintBottom_toTopOf="@id/tryAgainButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/tryAgainButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginBottom="12dp"
-            android:backgroundTint="#E0E0E0"
-            android:fontFamily="@font/bakbak_one"
-            android:text="Try Again"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            app:layout_constraintBottom_toTopOf="@id/importButtonResult"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <Button
-            android:id="@+id/importButtonResult"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginBottom="32dp"
-            android:backgroundTint="#E0E0E0"
-            android:drawableStart="@android:drawable/stat_sys_upload"
-            android:drawablePadding="8dp"
-            android:fontFamily="@font/bakbak_one"
-            android:paddingStart="24dp"
-            android:text="Upload Photo"
-            android:textAllCaps="false"
-            android:textColor="#000000"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="12dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="120dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <Button
+                android:id="@+id/tryAgainButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:backgroundTint="#D9D9D9"
+                android:text="Try Again"
+                android:textAllCaps="false"
+                android:textColor="#000000" />
+            <Button
+                android:id="@+id/addToJournalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#2E7D4A"
+                android:text="Add to Journal"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/importButtonResult"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="@string/import_button"
+                android:textColor="#2E7D4A"
+                android:visibility="gone" />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Bottom Navigation -->
-    <LinearLayout
-        android:id="@+id/bottomNavigation"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#458C60"
-        android:orientation="horizontal"
+    <!-- Bottom Navigation Bar Bg -->
+    <View
+        android:id="@+id/bottomNavBg"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:background="#4DD9D9D9"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Navigation Area Icons -->
+    <ImageView
+        android:id="@+id/navHome"
+        android:layout_width="35dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/home__1_"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvHomeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:fontFamily="@font/inter"
+        android:text="Home"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navHome"
+        app:layout_constraintStart_toStartOf="@id/navHome"
+        app:layout_constraintTop_toBottomOf="@id/navHome" />
+
+    <ImageView
+        android:id="@+id/navLibrary"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="108dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/libr"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLibraryLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:fontFamily="@font/inter"
+        android:text="Library"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navLibrary"
+        app:layout_constraintStart_toStartOf="@id/navLibrary"
+        app:layout_constraintTop_toBottomOf="@id/navLibrary" />
+
+    <ImageView
+        android:id="@+id/navJournal"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="259dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/jour"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvJournalLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:fontFamily="@font/inter"
+        android:text="Journal"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navJournal"
+        app:layout_constraintStart_toStartOf="@id/navJournal"
+        app:layout_constraintTop_toBottomOf="@id/navJournal" />
+
+    <ImageView
+        android:id="@+id/navCalendar"
+        android:layout_width="35dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="322dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/calendar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCalendarLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:fontFamily="@font/inter"
+        android:text="Calendar"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navCalendar"
+        app:layout_constraintStart_toStartOf="@id/navCalendar"
+        app:layout_constraintTop_toBottomOf="@id/navCalendar" />
+
+    <!-- Camera FAB -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/navIdentify"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_marginBottom="15dp"
+        app:cardBackgroundColor="#2E7D4A"
+        app:cardCornerRadius="37dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-
-        <LinearLayout
-            android:id="@+id/navIdentify"
-            android:layout_width="0dp"
+        <ImageView
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:foreground="@android:drawable/ic_menu_camera"
-                android:foregroundTint="#FFFFFF"
-                android:src="@android:drawable/ic_menu_camera"
-                app:tint="#FFFFFF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Identify"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navLibrary"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_library_books"
-                app:tint="#9AE0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Library"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navJournal"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="#E0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Journal"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navCalendar"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                app:tint="#E0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Calendar"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
-        </LinearLayout>
-    </LinearLayout>
+            android:padding="20dp"
+            android:src="@drawable/cam"
+            android:contentDescription="Identify" />
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

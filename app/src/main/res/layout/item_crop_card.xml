@@ -2,69 +2,59 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginVertical="8dp"
-    android:layout_marginHorizontal="16dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="#F0F0F0">
+    android:layout_width="160dp"
+    android:layout_height="175dp"
+    android:layout_margin="10dp"
+    app:cardBackgroundColor="#66D9E8C9"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:layout_height="match_parent">
 
+        <!-- Image (Rectangle 35 style) -->
         <ImageView
             android:id="@+id/cropImageView"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:contentDescription="Crop Image"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="8dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_foreground"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/cassava" />
 
+        <!-- Title (Cassava, etc.) -->
         <TextView
             android:id="@+id/cropNameText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:fontFamily="@font/bakbak_one"
-            android:text="Crop Name..."
-            android:textColor="#000000"
-            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="88dp"
+            android:fontFamily="@font/eb_garamond"
+            android:includeFontPadding="false"
+            android:textColor="#1F4D2E"
+            android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/cropImageView"
-            app:layout_constraintTop_toTopOf="@id/cropImageView" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Cassava" />
 
-        <TextView
-            android:id="@+id/scientificNameText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Scientific name"
-            android:textColor="#9E9E9E"
-            android:textSize="14sp"
-            android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/cropNameText"
-            app:layout_constraintTop_toBottomOf="@id/cropNameText" />
-
+        <!-- Description -->
         <TextView
             android:id="@+id/descriptionPreviewText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="@font/bakbak_one"
-            android:maxLines="2"
-            android:text="description"
-            android:textColor="#616161"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/scientificNameText"
-            app:layout_constraintTop_toBottomOf="@id/scientificNameText" />
+            android:layout_width="128dp"
+            android:layout_height="47dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="112dp"
+            android:fontFamily="@font/instrument_sans"
+            android:gravity="center_vertical"
+            android:textColor="#000000"
+            android:textSize="10sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="description" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

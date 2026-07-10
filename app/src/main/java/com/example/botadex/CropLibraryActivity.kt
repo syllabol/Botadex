@@ -11,7 +11,6 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -27,7 +26,7 @@ class CropLibraryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_crop_library)
 
         recyclerView = findViewById(R.id.cropRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        // Programmatic LayoutManager removed to allow XML GridLayoutManager (2 columns) to work
 
         val searchEditText = findViewById<EditText>(R.id.searchEditText)
         val availableText = findViewById<TextView>(R.id.availableOfflineText)
@@ -127,13 +126,11 @@ class CropLibraryActivity : AppCompatActivity() {
             private val onItemClick: (CropInfo) -> Unit
         ) : RecyclerView.ViewHolder(itemView) {
             private val nameText = itemView.findViewById<TextView>(R.id.cropNameText)
-            private val scientificNameText = itemView.findViewById<TextView>(R.id.scientificNameText)
             private val descriptionText = itemView.findViewById<TextView>(R.id.descriptionPreviewText)
             private val cropImageView = itemView.findViewById<ImageView>(R.id.cropImageView)
 
             fun bind(crop: CropInfo) {
                 nameText.text = crop.name
-                scientificNameText.text = crop.scientificName ?: "Scientific name"
                 descriptionText.text = crop.description
                 
                 // Map crop name to its specific image

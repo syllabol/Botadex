@@ -1,55 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="16dp"
-    app:cardBackgroundColor="#E0E0E0">
+    android:paddingVertical="8dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+    <!-- Icon Box (Rectangle 101/102 style) -->
+    <View
+        android:id="@+id/stageIconBox"
+        android:layout_width="40dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="16dp"
+        android:background="#267BAF6F"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/stageNumber"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:fontFamily="@font/eb_garamond"
+        android:textColor="#1F4D2E"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/stageIconBox"
+        app:layout_constraintEnd_toEndOf="@id/stageIconBox"
+        app:layout_constraintStart_toStartOf="@id/stageIconBox"
+        app:layout_constraintTop_toTopOf="@id/stageIconBox"
+        tools:text="1" />
 
-        <TextView
-            android:id="@+id/stageNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/bakbak_one"
-            android:text="1"
-            android:textColor="#000000"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <!-- Stage Name -->
+    <TextView
+        android:id="@+id/stageTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:fontFamily="@font/eb_garamond"
+        android:textColor="#1F4D2E"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/stageIconBox"
+        app:layout_constraintTop_toTopOf="@id/stageIconBox"
+        tools:text="Seedling" />
 
-        <TextView
-            android:id="@+id/stageTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:fontFamily="@font/bakbak_one"
-            android:text="Stage Name"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/stageNumber"
-            app:layout_constraintTop_toTopOf="parent" />
+    <!-- Day Range Label -->
+    <TextView
+        android:id="@+id/stageDayLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/instrument_sans"
+        android:textColor="#000000"
+        android:textSize="8sp"
+        app:layout_constraintBottom_toBottomOf="@id/stageTitle"
+        app:layout_constraintStart_toEndOf="@id/stageTitle"
+        app:layout_constraintTop_toTopOf="@id/stageTitle"
+        tools:text="Day 1 - 14" />
 
-        <TextView
-            android:id="@+id/stageDescription"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/bakbak_one"
-            android:text="Description of the stage"
-            android:textColor="#616161"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@id/stageTitle"
-            app:layout_constraintTop_toBottomOf="@id/stageTitle" />
+    <!-- Description -->
+    <TextView
+        android:id="@+id/stageDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/instrument_sans"
+        android:textColor="#000000"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/stageTitle"
+        app:layout_constraintTop_toBottomOf="@id/stageTitle"
+        tools:text="The initial stage of growth after germination." />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
+    <!-- Divider Line -->
+    <View
+        android:id="@+id/itemDivider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#0D000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/stageIconBox"
+        app:layout_constraintTop_toBottomOf="@id/stageDescription" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,9 +21,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
 import com.example.botadex.database.BotadexDatabase
 import com.example.botadex.database.JournalEntry
+import com.example.botadex.database.Reminder
+import com.example.botadex.database.JournalCollection
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -55,11 +58,7 @@ class AddJournalEntryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_journal_entry)
 
-        db = Room.databaseBuilder(
-            applicationContext,
-            BotadexDatabase::class.java,
-            "botadex-db"
-        ).fallbackToDestructiveMigration().build()
+        db = BotadexDatabase.getDatabase(this)
 
         imagesRecyclerView = findViewById(R.id.imagesRecyclerView)
         imagesRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
@@ -72,18 +71,10 @@ class AddJournalEntryActivity : AppCompatActivity() {
         findViewById<View>(R.id.backButton).setOnClickListener { finish() }
 
         // Bottom Navigation
-        findViewById<View>(R.id.navIdentify).setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-        }
-        findViewById<View>(R.id.navLibrary).setOnClickListener {
-            startActivity(Intent(this, CropLibraryActivity::class.java))
-        }
-        findViewById<View>(R.id.navJournal).setOnClickListener {
-            startActivity(Intent(this, JournalActivity::class.java))
-        }
-        findViewById<View>(R.id.navCalendar).setOnClickListener {
-            startActivity(Intent(this, RemindersActivity::class.java))
-        }
+        findViewById<View>(R.id.navIdentify).setOnClickListener { startActivity(Intent(this, MainActivity::class.java)) }
+        findViewById<View>(R.id.navLibrary).setOnClickListener { startActivity(Intent(this, CropLibraryActivity::class.java)) }
+        findViewById<View>(R.id.navJournal).setOnClickListener { startActivity(Intent(this, JournalActivity::class.java)) }
+        findViewById<View>(R.id.navCalendar).setOnClickListener { startActivity(Intent(this, RemindersActivity::class.java)) }
 
         journalId = intent.getIntExtra("JOURNAL_ID", -1)
         targetCollectionId = intent.getIntExtra("COLLECTION_ID", -1)
@@ -113,7 +104,8 @@ class AddJournalEntryActivity : AppCompatActivity() {
         notesEditText.isEnabled = false
         
         lifecycleScope.launch {
-            val entry = db.cropDao().getAllJournal().find { it.id == journalId }
+            val entries = db.cropDao().getAllJournal()
+            val entry = entries.find { it.id == journalId }
             entry?.let {
                 cropNameEditText.setText(it.cropName)
                 dateEditText.setText(it.date)
@@ -133,15 +125,22 @@ class AddJournalEntryActivity : AppCompatActivity() {
         saveButton.visibility = View.VISIBLE
         saveButton.setImageResource(android.R.drawable.ic_menu_save)
         
-        val cropName = intent.getStringExtra("CROP_NAME")
         val initialImagePath = intent.getStringExtra("IMAGE_PATH")
+        initialImagePath?.let { imagePaths.add(it) }
 
-        cropNameEditText.setText(cropName)
-        
-        val currentDate = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(Date())
+        val currentDate = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault()).format(Date())
         dateEditText.setText(currentDate)
 
-        initialImagePath?.let { imagePaths.add(it) }
+        lifecycleScope.launch {
+            val collection = db.cropDao().getAllCollectionsOnce().find { it.id == targetCollectionId }
+            if (collection != null) {
+                // Prefill with Plant Name (Collection Title) for consistent chronological labeling
+                cropNameEditText.setText(collection.title)
+            } else {
+                val cropName = intent.getStringExtra("CROP_NAME")
+                cropNameEditText.setText(cropName)
+            }
+        }
     }
 
     private fun saveEntry() {
@@ -150,7 +149,7 @@ class AddJournalEntryActivity : AppCompatActivity() {
         val notes = notesEditText.text.toString()
 
         if (name.isEmpty()) {
-            Toast.makeText(this, "Please enter a crop name", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Please enter a title", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -159,25 +158,80 @@ class AddJournalEntryActivity : AppCompatActivity() {
             return
         }
 
-        val journalEntry = JournalEntry(
-            id = 0,
-            collectionId = targetCollectionId,
-            cropName = name,
-            notes = notes,
-            date = date,
-            imagePaths = imagePaths.joinToString(",")
-        )
-
         lifecycleScope.launch {
-            db.cropDao().insertJournal(journalEntry)
+            val collections = db.cropDao().getAllCollectionsOnce()
+            val collection = collections.find { it.id == targetCollectionId }
+            
+            val journalEntry = JournalEntry(
+                id = 0,
+                collectionId = targetCollectionId,
+                cropName = name, // This acts as the Entry Title
+                notes = notes,
+                date = date,
+                imagePaths = imagePaths.joinToString(","),
+                dayCount = collection?.currentDay ?: 1,
+                timestamp = System.currentTimeMillis()
+            )
+
+            db.cropDao().insertJournalEntry(journalEntry)
+            
+            // Interaction resets health to Healthy and updates last interaction date
+            collection?.let {
+                val updatedCollection = it.copy(
+                    healthStatus = "Healthy",
+                    lastInteractionDate = System.currentTimeMillis()
+                )
+                db.cropDao().insertCollection(updatedCollection)
+            }
+            
+            autoScheduleReminders(collection?.cropName ?: "")
             Toast.makeText(this@AddJournalEntryActivity, "Entry Saved", Toast.LENGTH_SHORT).show()
             
-            // Redirect to the collection detail view
             val intent = Intent(this@AddJournalEntryActivity, CollectionDetailActivity::class.java)
             intent.putExtra("COLLECTION_ID", targetCollectionId)
+            intent.putExtra("COLLECTION_TITLE", collection?.title)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
             finish()
+        }
+    }
+
+    private suspend fun autoScheduleReminders(cropName: String) {
+        if (cropName.isEmpty()) return
+        val normalizedName = cropName.lowercase().trim()
+
+        val calendar = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+
+        // 1. Schedule Watering
+        val existingWatering = db.cropDao().getExistingReminders(cropName, "Watering")
+        if (existingWatering.isEmpty()) {
+            for (i in 1..7) {
+                calendar.add(Calendar.DAY_OF_YEAR, 2)
+                val reminder = Reminder(
+                    cropName = cropName,
+                    taskType = "Watering",
+                    date = dateFormat.format(calendar.time),
+                    time = "7:00 AM",
+                    timestamp = calendar.timeInMillis
+                )
+                db.cropDao().insertReminder(reminder)
+            }
+        }
+
+        // 2. Schedule Fertilization
+        val existingFertilizer = db.cropDao().getExistingReminders(cropName, "Fertilizing")
+        if (existingFertilizer.isEmpty()) {
+            calendar.time = Date() // reset
+            calendar.add(Calendar.WEEK_OF_YEAR, 4)
+            val reminder = Reminder(
+                cropName = cropName,
+                taskType = "Fertilizing",
+                date = dateFormat.format(calendar.time),
+                time = "8:00 AM",
+                timestamp = calendar.timeInMillis
+            )
+            db.cropDao().insertReminder(reminder)
         }
     }
 
@@ -190,7 +244,9 @@ class AddJournalEntryActivity : AppCompatActivity() {
         val closeButton = dialog.findViewById<ImageButton>(R.id.closeButton)
 
         val bitmap = BitmapFactory.decodeFile(path)
-        fullImageView.setImageBitmap(bitmap)
+        if (bitmap != null) {
+            fullImageView.setImageBitmap(bitmap)
+        }
         fullImageView.scaleType = ImageView.ScaleType.FIT_CENTER
 
         closeButton.setOnClickListener { dialog.dismiss() }
@@ -232,7 +288,9 @@ class AddJournalEntryActivity : AppCompatActivity() {
                     val uri: Uri? = data?.data
                     uri?.let {
                         try {
-                            bitmap = MediaStore.Images.Media.getBitmap(contentResolver, it)
+                            val inputStream = contentResolver.openInputStream(it)
+                            bitmap = BitmapFactory.decodeStream(inputStream)
+                            inputStream?.close()
                         } catch (e: IOException) {
                             e.printStackTrace()
                         }
@@ -313,7 +371,9 @@ class AddJournalEntryActivity : AppCompatActivity() {
                 removeButton.visibility = if (isEditMode && journalId == -1) View.VISIBLE else View.GONE
                 
                 val bitmap = BitmapFactory.decodeFile(path)
-                imageView.setImageBitmap(bitmap)
+                if (bitmap != null) {
+                    imageView.setImageBitmap(bitmap)
+                }
 
                 itemView.setOnClickListener { onImageClick(path) }
                 removeButton.setOnClickListener { onRemoveClick(position) }

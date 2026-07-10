@@ -4,210 +4,356 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F4F6F2">
 
-    <!-- Header Section -->
-    <View
-        android:id="@+id/headerBackground"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="#458C60"
+    <!-- Header Area -->
+
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="30dp"
+        android:contentDescription="Back"
+        android:src="@drawable/arrow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#1D1B20" />
+
+    <TextView
+        android:id="@+id/tvCropDetailTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/instrument_sans"
+        android:text="Crop Info"
+        android:textColor="#1F4D2E"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/backButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
-        android:src="@drawable/abc_ic_ab_back_material"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="#FFFFFF" />
-
-    <TextView
-        android:id="@+id/cropNameText"
-        android:layout_width="220dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/backButton"
-        app:layout_constraintStart_toEndOf="@id/backButton"
-        app:layout_constraintTop_toTopOf="@id/backButton"
-        tools:text="Crop Name" />
-
-    <TextView
-        android:id="@+id/scientificNameText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="#E0E0E0"
-        android:textSize="16sp"
-        android:textStyle="italic"
-        app:layout_constraintStart_toStartOf="@id/cropNameText"
-        app:layout_constraintTop_toBottomOf="@id/cropNameText"
-        tools:text="Scientific name" />
-
-    <LinearLayout
-        android:id="@+id/growthButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/rounded_green_button"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp"
-        app:layout_constraintBottom_toBottomOf="@id/cropNameText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/cropNameText">
-
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@android:drawable/ic_media_play"
-            app:tint="#FFFFFF" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:text="3D Growth"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold|italic" />
-    </LinearLayout>
-
-    <!-- Content Section -->
-    <ScrollView
-        android:layout_width="0dp"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerBackground">
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBg"
+        app:layout_constraintTop_toBottomOf="@id/tvCropDetailTitle">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="24dp">
+            android:paddingBottom="24dp">
 
-            <TextView
-                android:id="@+id/descriptionText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/bakbak_one"
-                android:textColor="#000000"
-                android:textSize="14sp"
-                tools:text="Crop description" />
+            <!-- Main Crop Image Frame (wavysquare) -->
+            <FrameLayout
+                android:id="@+id/wavySquareFrame"
+                android:layout_width="400dp"
+                android:layout_height="265dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/cropFullImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_launcher_background"
+                    app:shapeAppearanceOverlay="@style/wavysquare"/>
+            </FrameLayout>
+
+            <!-- Crop Thumbnail Overlay (Converted to FrameLayout to remove border) -->
+            <FrameLayout
+                android:id="@+id/cropThumbnailCard"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginStart="43dp"
+                app:layout_constraintBottom_toBottomOf="@id/wavySquareFrame"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/wavySquareFrame">
+
+                <ImageView
+                    android:id="@+id/cropThumbnail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerCrop"
+                    tools:src="@drawable/ic_launcher_foreground" />
+            </FrameLayout>
+
+            <!-- Crop Names -->
             <TextView
+                android:id="@+id/cropNameText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:fontFamily="@font/bakbak_one"
-                android:text="Key Characteristics"
+                android:layout_marginTop="12dp"
+                android:fontFamily="@font/eb_garamond"
+                android:textColor="#1F4D2E"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@id/cropThumbnailCard"
+                app:layout_constraintTop_toBottomOf="@id/cropThumbnailCard"
+                tools:text="Cassava" />
+
+            <TextView
+                android:id="@+id/scientificNameText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/instrument_sans"
+                android:textColor="#B3000000"
+                android:textSize="10sp"
+                app:layout_constraintStart_toStartOf="@id/cropNameText"
+                app:layout_constraintTop_toBottomOf="@id/cropNameText"
+                tools:text="Manihot esculenta" />
+
+            <!-- Description Container -->
+            <TextView
+                android:id="@+id/descriptionText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="43dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/instrument_sans"
+                android:maxLines="2"
                 android:textColor="#000000"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="10sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/scientificNameText"
+                app:layout_constraintTop_toBottomOf="@id/scientificNameText"
+                tools:text="Description text goes here. Tap see more to expand." />
 
-            <!-- Dynamic Characteristics List -->
-            <LinearLayout
-                android:id="@+id/characteristicsContainer"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/seeMoreText"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical" />
+                android:fontFamily="@font/instrument_sans"
+                android:text="See More"
+                android:textColor="#2E7D4A"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:paddingTop="2dp"
+                app:layout_constraintStart_toStartOf="@id/descriptionText"
+                app:layout_constraintTop_toBottomOf="@id/descriptionText" />
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabLayout"
+            <!-- Tab Buttons (Direct Siblings) -->
+            <TextView
+                android:id="@+id/tabCareGuide"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="39dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/instrument_sans"
+                android:gravity="center"
+                android:text="Care Guide"
+                android:textColor="#2E7D4A"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toStartOf="@id/tabCropUses"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/seeMoreText" />
+
+            <TextView
+                android:id="@+id/tabCropUses"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:fontFamily="@font/instrument_sans"
+                android:gravity="center"
+                android:text="Crop Uses"
+                android:textColor="#B3000000"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="@id/tabCareGuide"
+                app:layout_constraintEnd_toStartOf="@id/tabGrowthStages"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@id/tabCareGuide"
+                app:layout_constraintTop_toTopOf="@id/tabCareGuide" />
+
+            <TextView
+                android:id="@+id/tabGrowthStages"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="39dp"
+                android:fontFamily="@font/instrument_sans"
+                android:gravity="center"
+                android:text="Growth Stages"
+                android:textColor="#B3000000"
+                android:textSize="15sp"
+                app:layout_constraintBottom_toBottomOf="@id/tabCareGuide"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_weight="1.2"
+                app:layout_constraintStart_toEndOf="@id/tabCropUses"
+                app:layout_constraintTop_toTopOf="@id/tabCareGuide" />
+
+            <View
+                android:id="@+id/lineDivider"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:tabIndicatorColor="#458C60"
-                app:tabSelectedTextColor="#458C60"
-                app:tabTextColor="#616161">
-                <com.google.android.material.tabs.TabItem android:text="Care Guide" />
-                <com.google.android.material.tabs.TabItem android:text="Uses" />
-                <com.google.android.material.tabs.TabItem android:text="Growth Stages" />
-            </com.google.android.material.tabs.TabLayout>
+                android:layout_height="1dp"
+                android:layout_marginTop="4dp"
+                android:background="#1A000000"
+                app:layout_constraintTop_toBottomOf="@id/tabCareGuide" />
 
+            <!-- Tab Underlines -->
+            <View
+                android:id="@+id/lineTab1"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="#2E7D4A"
+                app:layout_constraintBottom_toBottomOf="@id/lineDivider"
+                app:layout_constraintEnd_toEndOf="@id/tabCareGuide"
+                app:layout_constraintStart_toStartOf="@id/tabCareGuide" />
+
+            <View
+                android:id="@+id/lineTab2"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="#1A000000"
+                app:layout_constraintBottom_toBottomOf="@id/lineDivider"
+                app:layout_constraintEnd_toEndOf="@id/tabCropUses"
+                app:layout_constraintStart_toStartOf="@id/tabCropUses" />
+
+            <View
+                android:id="@+id/lineTab3"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:background="#1A000000"
+                app:layout_constraintBottom_toBottomOf="@id/lineDivider"
+                app:layout_constraintEnd_toEndOf="@id/tabGrowthStages"
+                app:layout_constraintStart_toStartOf="@id/tabGrowthStages" />
+
+            <!-- Active Indicator -->
+            <View
+                android:id="@+id/activeTabIndicator"
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:background="#2E7D4A"
+                app:layout_constraintBottom_toBottomOf="@id/lineDivider"
+                app:layout_constraintEnd_toEndOf="@id/tabCareGuide"
+                app:layout_constraintStart_toStartOf="@id/tabCareGuide" />
+
+            <!-- Tab Content Container -->
             <FrameLayout
                 android:id="@+id/tabContentContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
-                <!-- Dynamic tab content will be added here -->
-            </FrameLayout>
+                app:layout_constraintTop_toBottomOf="@id/lineDivider" />
 
-        </LinearLayout>
-    </ScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
     <!-- Bottom Navigation -->
-    <LinearLayout
-        android:id="@+id/bottomNavigation"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#458C60"
-        android:orientation="horizontal"
+    <View
+        android:id="@+id/bottomNavBg"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:background="#4DD9D9D9"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ImageView
+        android:id="@+id/navHome"
+        android:layout_width="35dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/home__1_"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvHomeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:text="Home"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navHome"
+        app:layout_constraintStart_toStartOf="@id/navHome"
+        app:layout_constraintTop_toBottomOf="@id/navHome" />
+
+    <ImageView
+        android:id="@+id/navLibrary"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="108dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/libr"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvLibraryLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:text="Library"
+        android:textColor="#2E7D4A"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navLibrary"
+        app:layout_constraintStart_toStartOf="@id/navLibrary"
+        app:layout_constraintTop_toBottomOf="@id/navLibrary" />
+
+    <ImageView
+        android:id="@+id/navJournal"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="259dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/jour"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvJournalLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:text="Journal"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navJournal"
+        app:layout_constraintStart_toStartOf="@id/navJournal"
+        app:layout_constraintTop_toBottomOf="@id/navJournal" />
+
+    <ImageView
+        android:id="@+id/navCalendar"
+        android:layout_width="35dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="322dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/calendar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvCalendarLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="13dp"
+        android:text="Calendar"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navCalendar"
+        app:layout_constraintStart_toStartOf="@id/navCalendar"
+        app:layout_constraintTop_toBottomOf="@id/navCalendar" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/navIdentify"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_marginBottom="15dp"
+        app:cardBackgroundColor="#2E7D4A"
+        app:cardCornerRadius="37dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
-        <LinearLayout
-            android:id="@+id/navIdentify"
-            android:layout_width="0dp"
+
+        <ImageView
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_camera" app:tint="#E0E0E0" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Identify" android:textColor="#E0E0E0" android:textSize="10sp" />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/navLibrary"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_library_books" app:tint="#FFFFFF" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Library" android:textColor="#FFFFFF" android:textSize="10sp" />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/navJournal"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_edit" app:tint="#E0E0E0" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Journal" android:textColor="#E0E0E0" android:textSize="10sp" />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/navCalendar"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@android:drawable/ic_menu_my_calendar" app:tint="#E0E0E0" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Calendar" android:textColor="#E0E0E0" android:textSize="10sp" />
-        </LinearLayout>
-    </LinearLayout>
+            android:padding="20dp"
+            android:src="@drawable/cam" />
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

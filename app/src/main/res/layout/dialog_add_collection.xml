@@ -9,8 +9,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="New Collection"
-        android:textColor="#458C60"
+        android:text="New Crop Collection"
+        android:textColor="@color/text_green_dark"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -18,7 +18,15 @@
         android:id="@+id/editCollectionTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter collection name (e.g. My Backyard Garden)"
+        android:hint="Plant Name (e.g. My Favorite Onion)"
+        android:inputType="textCapWords" />
+
+    <EditText
+        android:id="@+id/editCropName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Crop Type (e.g. Onion)"
         android:inputType="textCapWords" />
 
 </LinearLayout>

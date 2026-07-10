@@ -8,7 +8,9 @@ data class Reminder(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val cropName: String,
-    val taskType: String, // e.g., "Water plants", "Apply fertilizer"
-    val date: String,     // e.g., "March 15"
-    val time: String      // e.g., "7:00 am"
+    val taskType: String,
+    val date: String,
+    val time: String,
+    val timestamp: Long = 0L,
+    val isCompleted: Boolean = false
 )

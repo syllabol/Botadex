@@ -1,3 +1,6 @@
+// This file is redundant and overlaps with BotadexDao.kt.
+// It has been disabled to fix KSP build errors.
+/*
 package com.example.botadex.database
 
 import androidx.room.*
@@ -42,3 +45,4 @@ interface CropDao {
     @Delete
     suspend fun deleteCollection(collection: JournalCollection)
 }
+*/

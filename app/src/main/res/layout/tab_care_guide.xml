@@ -1,232 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <!-- Watering Section -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/wateringCard"
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        app:cardCornerRadius="16dp"
-        app:cardBackgroundColor="#E0E0E0"
-        app:strokeColor="#458C60"
-        app:strokeWidth="2dp">
-        <LinearLayout
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#1A000000"
+        app:strokeWidth="1dp"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/careGuideRecycler"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <RelativeLayout
-                android:id="@+id/wateringHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Watering"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <ImageView
-                    android:id="@+id/wateringArrow"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@android:drawable/arrow_down_float"
-                    android:contentDescription="Expand"
-                    app:tint="#458C60" />
-            </RelativeLayout>
-
-            <TextView
-                android:id="@+id/wateringText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/bakbak_one"
-                android:textColor="#616161"
-                android:textStyle="italic"
-                android:visibility="gone" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Fertilization Section -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/fertilizationCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        app:cardCornerRadius="16dp"
-        app:cardBackgroundColor="#E0E0E0"
-        app:strokeColor="#458C60"
-        app:strokeWidth="2dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <RelativeLayout
-                android:id="@+id/fertilizationHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Fertilization"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <ImageView
-                    android:id="@+id/fertilizationArrow"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@android:drawable/arrow_down_float"
-                    android:contentDescription="Expand"
-                    app:tint="#458C60" />
-            </RelativeLayout>
-
-            <TextView
-                android:id="@+id/fertilizationText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/bakbak_one"
-                android:textColor="#616161"
-                android:textStyle="italic"
-                android:visibility="gone" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Pest Control Section -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/pestControlCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        app:cardCornerRadius="16dp"
-        app:cardBackgroundColor="#E0E0E0"
-        app:strokeColor="#458C60"
-        app:strokeWidth="2dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <RelativeLayout
-                android:id="@+id/pestControlHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Pest control"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <ImageView
-                    android:id="@+id/pestControlArrow"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@android:drawable/arrow_down_float"
-                    android:contentDescription="Expand"
-                    app:tint="#458C60" />
-            </RelativeLayout>
-
-            <TextView
-                android:id="@+id/pestControlText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/bakbak_one"
-                android:textColor="#616161"
-                android:textStyle="italic"
-                android:visibility="gone" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Harvesting Section -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/harvestingCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        app:cardCornerRadius="16dp"
-        app:cardBackgroundColor="#E0E0E0"
-        app:strokeColor="#458C60"
-        app:strokeWidth="2dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <RelativeLayout
-                android:id="@+id/harvestingHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:fontFamily="@font/bakbak_one"
-                    android:text="Harvesting"
-                    android:textColor="#000000"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-                <ImageView
-                    android:id="@+id/harvestingArrow"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:src="@android:drawable/arrow_down_float"
-                    android:contentDescription="Expand"
-                    app:tint="#458C60" />
-            </RelativeLayout>
-
-            <TextView
-                android:id="@+id/harvestingText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/bakbak_one"
-                android:textColor="#616161"
-                android:textStyle="italic"
-                android:visibility="gone" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
+            android:nestedScrollingEnabled="false"
+            android:padding="8dp" />
+    </androidx.cardview.widget.CardView>
 </LinearLayout>

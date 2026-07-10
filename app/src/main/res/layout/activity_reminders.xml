@@ -4,133 +4,269 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F4F6F2"
+    tools:context=".RemindersActivity">
 
     <!-- Header Section -->
-    <View
-        android:id="@+id/headerBackground"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="#458C60"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/backButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="28dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
+        android:scaleType="fitCenter"
         android:src="@drawable/abc_ic_ab_back_material"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#FFFFFF" />
+        app:tint="#1D1B20"
+        tools:ignore="ContentDescription" />
 
     <TextView
-        android:id="@+id/titleText"
-        android:layout_width="220dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="8dp"
-        android:text="Reminders"
-        android:textColor="#FFFFFF"
-        android:textSize="32sp"
-        android:textStyle="bold|italic"
+        android:id="@+id/calendarTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/instrument_sans"
+        android:text="@string/title_calendar"
+        android:textColor="#1F4D2E"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/backButton"
-        app:layout_constraintStart_toEndOf="@id/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/backButton" />
 
-    <ImageButton
-        android:id="@+id/addReminderButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/circle_white_bg"
-        android:contentDescription="Add Reminder"
-        android:src="@android:drawable/ic_input_add"
-        app:layout_constraintBottom_toBottomOf="@id/titleText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/titleText"
-        app:tint="#4CAF50" />
-
-    <TextView
-        android:id="@+id/subtitleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Never miss farming task"
-        android:textColor="#E0E0E0"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        app:layout_constraintStart_toStartOf="@id/titleText"
-        app:layout_constraintTop_toBottomOf="@id/titleText" />
-
-    <!-- Info Section -->
-    <TextView
-        android:id="@+id/upcomingTaskLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:drawablePadding="8dp"
-        android:gravity="center_vertical"
-        android:text="Upcoming task"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:drawableStartCompat="@android:drawable/ic_lock_idle_alarm"
-        app:drawableTint="#4CAF50"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerBackground" />
-
-    <!-- RecyclerView for Reminders -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/remindersRecyclerView"
-        android:layout_width="0dp"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:paddingHorizontal="8dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/upcomingTaskLabel"
-        tools:listitem="@layout/item_reminder_card" />
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBg"
+        app:layout_constraintTop_toBottomOf="@id/calendarTitle">
 
-    <!-- Bottom Navigation -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="40dp">
+
+            <!-- Month Navigation -->
+            <LinearLayout
+                android:id="@+id/monthNav"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="26dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/prevMonth"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/abc_ic_ab_back_material"
+                    app:tint="#1D1B20"
+                    tools:ignore="ContentDescription" />
+
+                <TextView
+                    android:id="@+id/monthText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="11dp"
+                    android:fontFamily="@font/instrument_sans"
+                    android:textColor="#1F4D2E"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    tools:text="July 2026" />
+
+                <ImageView
+                    android:id="@+id/nextMonth"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:rotation="180"
+                    android:src="@drawable/abc_ic_ab_back_material"
+                    app:tint="#1D1B20"
+                    tools:ignore="ContentDescription" />
+            </LinearLayout>
+
+            <!-- Calendar Grid -->
+            <TableLayout
+                android:id="@+id/calendarGrid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:layout_marginTop="14dp"
+                android:stretchColumns="*"
+                app:layout_constraintTop_toBottomOf="@id/monthNav">
+
+                <TableRow>
+                    <TextView android:fontFamily="@font/instrument_sans" android:gravity="center" android:text="@string/sun" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" tools:ignore="SmallSp" />
+                    <TextView android:fontFamily="@font/instrument_sans" android:gravity="center" android:text="@string/mon" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" tools:ignore="SmallSp" />
+                    <TextView android:fontFamily="@font/instrument_sans" android:gravity="center" android:text="@string/tue" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" tools:ignore="SmallSp" />
+                    <TextView android:fontFamily="@font/instrument_sans" android:gravity="center" android:text="@string/wed" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" tools:ignore="SmallSp" />
+                    <TextView android:fontFamily="@font/instrument_sans" android:gravity="center" android:text="@string/thu" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" tools:ignore="SmallSp" />
+                    <TextView android:fontFamily="@font/instrument_sans" android:gravity="center" android:text="@string/fri" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" tools:ignore="SmallSp" />
+                    <TextView android:fontFamily="@font/instrument_sans" android:gravity="center" android:text="@string/sat" android:textColor="#000000" android:textSize="10sp" android:textStyle="bold" tools:ignore="SmallSp" />
+                </TableRow>
+            </TableLayout>
+
+            <!-- Reminders Section -->
+            <LinearLayout
+                android:id="@+id/todayRemindersSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="38dp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@id/calendarGrid">
+
+                <TextView
+                    android:id="@+id/todayLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:fontFamily="@font/instrument_sans"
+                    android:text="@string/reminders_for_today"
+                    android:textColor="#000000"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/todayRemindersContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="33dp"
+                    android:layout_marginTop="12dp"
+                    app:cardBackgroundColor="#267BAF6F"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/todayRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            tools:listitem="@layout/item_reminder_card" />
+
+                        <TextView
+                            android:id="@+id/noTodayRemindersText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/instrument_sans"
+                            android:text="@string/no_reminders_day"
+                            android:textColor="#5B6B7D"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
+                    </FrameLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+            <!-- Upcoming Reminders Section -->
+            <LinearLayout
+                android:id="@+id/upcomingRemindersSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="35dp"
+                android:orientation="vertical"
+                app:layout_constraintTop_toBottomOf="@id/todayRemindersSection">
+
+                <TextView
+                    android:id="@+id/upcomingLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="32dp"
+                    android:fontFamily="@font/instrument_sans"
+                    android:text="@string/upcoming"
+                    android:textColor="#000000"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/upcomingRemindersContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="33dp"
+                    android:layout_marginTop="12dp"
+                    app:cardBackgroundColor="#267BAF6F"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/upcomingRecyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false"
+                            tools:listitem="@layout/item_reminder_card" />
+
+                        <TextView
+                            android:id="@+id/noUpcomingRemindersText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:fontFamily="@font/instrument_sans"
+                            android:text="@string/no_upcoming_reminders"
+                            android:textColor="#5B6B7D"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
+                    </FrameLayout>
+                </androidx.cardview.widget.CardView>
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Navigation Area -->
+    <View
+        android:id="@+id/bottomNavBg"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:background="#4DD9D9D9"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
     <LinearLayout
-        android:id="@+id/bottomNavigation"
-        android:layout_width="0dp"
+        android:id="@+id/bottomNavItems"
+        android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:background="#458C60"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
-            android:id="@+id/navIdentify"
+            android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_camera"
-                app:tint="#E0E0E0" />
-
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/home__1_"
+                app:tint="#5B6B7D"
+                tools:ignore="ContentDescription" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Identify"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
+                android:text="Home"
+                android:textColor="#5B6B7D"
+                android:textSize="10sp"
+                tools:ignore="SmallSp" />
         </LinearLayout>
 
         <LinearLayout
@@ -138,47 +274,54 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_library_books"
-                app:tint="#9AE0E0E0" />
-
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/libr"
+                app:tint="#5B6B7D"
+                tools:ignore="ContentDescription" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Library"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
+                android:text="@string/nav_library"
+                android:textColor="#5B6B7D"
+                android:textSize="10sp"
+                tools:ignore="SmallSp" />
         </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
         <LinearLayout
             android:id="@+id/navJournal"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="#E0E0E0" />
-
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/jour"
+                app:tint="#5B6B7D"
+                tools:ignore="ContentDescription" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Journal"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
+                android:text="@string/nav_journal"
+                android:textColor="#5B6B7D"
+                android:textSize="10sp"
+                tools:ignore="SmallSp" />
         </LinearLayout>
 
         <LinearLayout
@@ -186,26 +329,43 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:foreground="@android:drawable/ic_menu_my_calendar"
-                android:foregroundTint="@color/white"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                app:tint="#FFFFFF" />
-
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/calendar__1_"
+                tools:ignore="ContentDescription" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Calendar"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp" />
+                android:text="@string/nav_calendar"
+                android:textColor="#2E7D4A"
+                android:textSize="10sp"
+                tools:ignore="SmallSp" />
         </LinearLayout>
     </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/navIdentify"
+        android:layout_width="74dp"
+        android:layout_height="73dp"
+        android:layout_marginBottom="15dp"
+        app:cardBackgroundColor="#2E7D4A"
+        app:cardCornerRadius="37dp"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="18dp"
+            android:src="@drawable/cam" />
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

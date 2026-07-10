@@ -4,218 +4,229 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F4F6F2">
 
-    <!-- Header Section -->
-    <View
-        android:id="@+id/headerBackground"
-        android:layout_width="0dp"
-        android:layout_height="180dp"
-        android:background="#458C60"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageButton
+    <!-- Chevron Backward (Back Button) -->
+    <ImageView
         android:id="@+id/backButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Back"
-        android:src="@drawable/abc_ic_ab_back_material"
+        android:rotationY="-180"
+        android:src="@drawable/arrow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#FFFFFF" />
+        app:tint="#1D1B20" />
 
+    <!-- Title: Crop Library -->
     <TextView
         android:id="@+id/titleText"
-        android:layout_width="220dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:fontFamily="@font/inter"
-        android:text="Crop Library"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintBottom_toBottomOf="@id/backButton"
-        app:layout_constraintStart_toEndOf="@id/backButton"
-        app:layout_constraintTop_toTopOf="@id/backButton" />
-
-    <ImageView
-        android:id="@+id/homeIcon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_home"
-        app:layout_constraintBottom_toBottomOf="@id/titleText"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/titleText"
-        app:tint="#FFFFFF" />
-
-    <TextView
-        android:id="@+id/subtitleText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:fontFamily="@font/inter"
-        android:text="Offline cultivation guides"
-        android:textColor="#E0E0E0"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        app:layout_constraintStart_toStartOf="@id/titleText"
+        android:fontFamily="@font/instrument_sans"
+        android:text="Crop Library"
+        android:textColor="#1F4D2E"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/backButton" />
+
+    <!-- Subtitle -->
+    <TextView
+        android:id="@+id/subtitleText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="39dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="39dp"
+        android:fontFamily="@font/eb_garamond"
+        android:text="Explore root crops and learn how to grow them successfully"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titleText" />
 
+    <!-- Search Bar -->
     <EditText
         android:id="@+id/searchEditText"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginHorizontal="16dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
         android:background="@drawable/search_background"
-        android:drawablePadding="8dp"
-        android:hint="Search Crops..."
-        android:paddingHorizontal="16dp"
-        android:textSize="14sp"
+        android:hint="Search crops..."
+        android:inputType="text"
+        android:paddingStart="47dp"
+        android:paddingEnd="15dp"
+        android:textSize="15sp"
+        android:fontFamily="@font/instrument_sans"
+        android:textColorHint="#33000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subtitleText" />
 
-    <!-- Info Section -->
+    <!-- Search Icon Overlay -->
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="14dp"
+        android:alpha="0.8"
+        android:src="@android:drawable/ic_menu_search"
+        app:layout_constraintBottom_toBottomOf="@id/searchEditText"
+        app:layout_constraintStart_toStartOf="@id/searchEditText"
+        app:layout_constraintTop_toTopOf="@id/searchEditText"
+        app:tint="#02542D" />
+
+    <!-- Available Offline Text -->
     <TextView
         android:id="@+id/availableOfflineText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
-        android:fontFamily="@font/inter"
-        android:text="5 crops available offline"
-        android:textColor="#9E9E9E"
+        android:fontFamily="@font/instrument_sans"
+        android:textColor="#5B6B7D"
         android:textSize="12sp"
-        android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerBackground" />
+        app:layout_constraintTop_toBottomOf="@id/searchEditText"
+        tools:text="10 crops available offline" />
 
     <!-- RecyclerView for Crops -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/cropRecyclerView"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
-        android:paddingHorizontal="8dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:clipToPadding="false"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBg"
         app:layout_constraintTop_toBottomOf="@id/availableOfflineText"
+        app:spanCount="2"
         tools:listitem="@layout/item_crop_card" />
 
-    <!-- Bottom Navigation -->
-    <LinearLayout
-        android:id="@+id/bottomNavigation"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#458C60"
-        android:orientation="horizontal"
+    <!-- Bottom Navigation Area -->
+    <View
+        android:id="@+id/bottomNavBg"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:background="#4DD9D9D9"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- Home Icon -->
+    <ImageView
+        android:id="@+id/homeIcon"
+        android:layout_width="35dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="38dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/home__1_"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/inter"
+        android:text="Home"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/homeIcon"
+        app:layout_constraintStart_toStartOf="@id/homeIcon"
+        app:layout_constraintTop_toBottomOf="@id/homeIcon" />
+
+    <!-- Library Icon - Active -->
+    <ImageView
+        android:id="@+id/navLibrary"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="108dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/libr"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/inter"
+        android:text="Library"
+        android:textColor="#2E7D4A"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navLibrary"
+        app:layout_constraintStart_toStartOf="@id/navLibrary"
+        app:layout_constraintTop_toBottomOf="@id/navLibrary" />
+
+    <!-- Journal Icon -->
+    <ImageView
+        android:id="@+id/navJournal"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="259dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/jour"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/inter"
+        android:text="Journal"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navJournal"
+        app:layout_constraintStart_toStartOf="@id/navJournal"
+        app:layout_constraintTop_toBottomOf="@id/navJournal" />
+
+    <!-- Calendar Icon -->
+    <ImageView
+        android:id="@+id/navCalendar"
+        android:layout_width="35dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="322dp"
+        android:layout_marginBottom="22dp"
+        android:src="@drawable/calendar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/inter"
+        android:text="Calendar"
+        android:textColor="#5B6B7D"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="@id/navCalendar"
+        app:layout_constraintStart_toStartOf="@id/navCalendar"
+        app:layout_constraintTop_toBottomOf="@id/navCalendar" />
+
+    <!-- Camera FAB -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/navIdentify"
+        android:layout_width="74dp"
+        android:layout_height="74dp"
+        android:layout_marginBottom="15dp"
+        app:cardBackgroundColor="#2E7D4A"
+        app:cardCornerRadius="37dp"
+        app:cardElevation="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <LinearLayout
-            android:id="@+id/navIdentify"
-            android:layout_width="0dp"
+        <ImageView
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_camera"
-                app:tint="#E0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Identify"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navLibrary"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_library_books"
-                app:tint="#FFFFFF" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Library"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navJournal"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="#E0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Journal"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navCalendar"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                app:tint="#E0E0E0" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Calendar"
-                android:textColor="#E0E0E0"
-                android:textSize="10sp" />
-        </LinearLayout>
-    </LinearLayout>
+            android:padding="20dp"
+            android:src="@drawable/cam" />
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
