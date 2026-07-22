@@ -1,5 +1,6 @@
 package com.example.botadex
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -18,6 +19,8 @@ import com.example.botadex.database.BotadexDatabase
 import com.example.botadex.database.JournalEntry
 import kotlinx.coroutines.launch
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class CollectionDetailActivity : AppCompatActivity() {
 
@@ -98,36 +101,65 @@ class CollectionDetailActivity : AppCompatActivity() {
     ) : RecyclerView.Adapter<JournalAdapter.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_journal_card, parent, false)
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_recent_journal_entry, parent, false)
             return ViewHolder(view)
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val entry = entries[position]
-            holder.name.text = entry.cropName
-            holder.date.text = entry.date
+            holder.title.text = "${entry.cropName} - Day ${entry.dayCount}"
             holder.notes.text = entry.notes
 
-            if (entry.imagePaths.isNotEmpty()) {
-                val firstPath = entry.imagePaths.split(",")[0]
-                val imgFile = File(firstPath)
-                if (imgFile.exists()) {
-                    holder.image.setImageBitmap(BitmapFactory.decodeFile(imgFile.absolutePath))
+            try {
+                val sdfInput = if (entry.date.contains("/")) {
+                    SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                } else {
+                    SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
                 }
+
+                val date = sdfInput.parse(entry.date)
+                if (date != null) {
+                    holder.monthDay.text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(date)
+                    holder.year.text = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+                } else {
+                    holder.monthDay.text = entry.date
+                    holder.year.text = ""
+                }
+            } catch (e: Exception) {
+                holder.monthDay.text = entry.date
+                holder.year.text = ""
+            }
+
+            if (entry.imagePaths.isNotEmpty()) {
+                val path = entry.imagePaths.split(",")[0]
+                val bitmap = BitmapFactory.decodeFile(path)
+                if (bitmap != null) {
+                    holder.image.setImageBitmap(bitmap)
+                } else {
+                    holder.image.setImageResource(R.color.placeholder_gray)
+                }
+            } else {
+                holder.image.setImageResource(R.color.placeholder_gray)
             }
 
             holder.itemView.setOnClickListener { onItemClick(entry) }
-            holder.deleteBtn.setOnClickListener { onDeleteClick(entry) }
+            
+            // Long click for delete since item_recent_journal_entry might not have a delete button visible
+            holder.itemView.setOnLongClickListener {
+                onDeleteClick(entry)
+                true
+            }
         }
 
         override fun getItemCount() = entries.size
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val image = view.findViewById<ImageView>(R.id.journalImage)
-            val name = view.findViewById<TextView>(R.id.cropNameText)
-            val date = view.findViewById<TextView>(R.id.dateText)
-            val notes = view.findViewById<TextView>(R.id.notesText)
-            val deleteBtn = view.findViewById<ImageButton>(R.id.deleteButton)
+            val monthDay: TextView = view.findViewById(R.id.tvEntryMonthDay)
+            val year: TextView = view.findViewById(R.id.tvEntryYear)
+            val title: TextView = view.findViewById(R.id.tvEntryTitle)
+            val notes: TextView = view.findViewById(R.id.tvEntryNotes)
+            val image: ImageView = view.findViewById(R.id.ivEntryImage)
         }
     }
 }

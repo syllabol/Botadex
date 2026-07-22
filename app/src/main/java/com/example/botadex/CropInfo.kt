@@ -19,13 +19,16 @@ data class CropInfo(
     val medicinalUses: List<String>? = emptyList(),
     @SerializedName("growth_stages")
     val growthStages: List<GrowthStage>? = emptyList(),
-    val harvesting: String? = ""
+    val harvesting: String? = "",
+    @SerializedName("total_days")
+    val totalDays: Int = 0
 )
 
 data class GrowthStage(
     val stage: String,
     val description: String,
-    val dayRange: String? = null
+    @SerializedName("duration_days")
+    val durationDays: Int = 0
 )
 
 data class DetailItem(

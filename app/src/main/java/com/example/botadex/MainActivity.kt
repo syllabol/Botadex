@@ -419,7 +419,8 @@ class MainActivity : AppCompatActivity() {
             characteristics = this.characteristics ?: emptyList(),
             culinaryUses = this.culinaryUses ?: emptyList(),
             medicinalUses = this.medicinalUses ?: emptyList(),
-            harvesting = this.harvesting
+            harvesting = this.harvesting,
+            totalDays = this.totalDays
         )
     }
 

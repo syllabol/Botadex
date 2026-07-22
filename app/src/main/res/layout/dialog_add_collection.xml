@@ -29,4 +29,24 @@
         android:hint="Crop Type (e.g. Onion)"
         android:inputType="textCapWords" />
 
+    <TextView
+        android:id="@+id/tvDatePlantedLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Date Planted"
+        android:textColor="@color/text_green_dark"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/editDatePlanted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:clickable="true"
+        android:cursorVisible="false"
+        android:focusable="false"
+        android:hint="Select Date"
+        android:inputType="none" />
+
 </LinearLayout>

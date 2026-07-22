@@ -1,6 +1,7 @@
 package com.example.botadex
 
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Bitmap
@@ -128,11 +129,24 @@ class AddJournalEntryActivity : AppCompatActivity() {
         val initialImagePath = intent.getStringExtra("IMAGE_PATH")
         initialImagePath?.let { imagePaths.add(it) }
 
-        val currentDate = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault()).format(Date())
-        dateEditText.setText(currentDate)
+        val calendar = Calendar.getInstance()
+        val sdf = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
+        dateEditText.setText(sdf.format(calendar.time))
+
+        val dateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            dateEditText.setText(sdf.format(calendar.time))
+        }
+
+        dateEditText.setOnClickListener {
+            DatePickerDialog(this, dateSetListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
 
         lifecycleScope.launch {
-            val collection = db.cropDao().getAllCollectionsOnce().find { it.id == targetCollectionId }
+            val collections = db.cropDao().getAllCollectionsOnce()
+            val collection = collections.find { it.id == targetCollectionId }
             if (collection != null) {
                 // Prefill with Plant Name (Collection Title) for consistent chronological labeling
                 cropNameEditText.setText(collection.title)
@@ -162,6 +176,23 @@ class AddJournalEntryActivity : AppCompatActivity() {
             val collections = db.cropDao().getAllCollectionsOnce()
             val collection = collections.find { it.id == targetCollectionId }
             
+            val sdf = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
+            var dayCount = collection?.currentDay ?: 1
+
+            // Dynamic Day Calculation: Entry Date vs Planting Date
+            if (collection != null) {
+                try {
+                    val plantedDateObj = sdf.parse(collection.date)
+                    val entryDateObj = sdf.parse(date)
+                    if (plantedDateObj != null && entryDateObj != null) {
+                        val diff = entryDateObj.time - plantedDateObj.time
+                        dayCount = (diff / (1000 * 60 * 60 * 24)).toInt() + 1
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
             val journalEntry = JournalEntry(
                 id = 0,
                 collectionId = targetCollectionId,
@@ -169,7 +200,7 @@ class AddJournalEntryActivity : AppCompatActivity() {
                 notes = notes,
                 date = date,
                 imagePaths = imagePaths.joinToString(","),
-                dayCount = collection?.currentDay ?: 1,
+                dayCount = if (dayCount > 0) dayCount else 1,
                 timestamp = System.currentTimeMillis()
             )
 
@@ -184,7 +215,6 @@ class AddJournalEntryActivity : AppCompatActivity() {
                 db.cropDao().insertCollection(updatedCollection)
             }
             
-            autoScheduleReminders(collection?.cropName ?: "")
             Toast.makeText(this@AddJournalEntryActivity, "Entry Saved", Toast.LENGTH_SHORT).show()
             
             val intent = Intent(this@AddJournalEntryActivity, CollectionDetailActivity::class.java)
@@ -193,45 +223,6 @@ class AddJournalEntryActivity : AppCompatActivity() {
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
             finish()
-        }
-    }
-
-    private suspend fun autoScheduleReminders(cropName: String) {
-        if (cropName.isEmpty()) return
-        val normalizedName = cropName.lowercase().trim()
-
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
-
-        // 1. Schedule Watering
-        val existingWatering = db.cropDao().getExistingReminders(cropName, "Watering")
-        if (existingWatering.isEmpty()) {
-            for (i in 1..7) {
-                calendar.add(Calendar.DAY_OF_YEAR, 2)
-                val reminder = Reminder(
-                    cropName = cropName,
-                    taskType = "Watering",
-                    date = dateFormat.format(calendar.time),
-                    time = "7:00 AM",
-                    timestamp = calendar.timeInMillis
-                )
-                db.cropDao().insertReminder(reminder)
-            }
-        }
-
-        // 2. Schedule Fertilization
-        val existingFertilizer = db.cropDao().getExistingReminders(cropName, "Fertilizing")
-        if (existingFertilizer.isEmpty()) {
-            calendar.time = Date() // reset
-            calendar.add(Calendar.WEEK_OF_YEAR, 4)
-            val reminder = Reminder(
-                cropName = cropName,
-                taskType = "Fertilizing",
-                date = dateFormat.format(calendar.time),
-                time = "8:00 AM",
-                timestamp = calendar.timeInMillis
-            )
-            db.cropDao().insertReminder(reminder)
         }
     }
 

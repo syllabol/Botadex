@@ -6,56 +6,28 @@
     android:layout_height="match_parent"
     android:background="#F4F6F2">
 
-    <!-- Chevron Backward -->
-    <ImageView
-        android:id="@+id/backButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="30dp"
-        android:src="@drawable/arrow"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="#1D1B20"
-        android:contentDescription="Back" />
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/tvIdentifyTitleHeader"
-        android:layout_width="wrap_content"
-        android:layout_height="26dp"
-        android:layout_marginTop="32dp"
-        android:fontFamily="@font/instrument_sans"
-        android:text="Identify Crop"
-        android:textColor="#1F4D2E"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Subtitle -->
-    <TextView
-        android:id="@+id/tvSubtitle"
-        android:layout_width="262dp"
-        android:layout_height="95dp"
-        android:layout_marginStart="39dp"
-        android:layout_marginTop="69dp"
-        android:fontFamily="@font/eb_garamond"
-        android:lineSpacingExtra="5dp"
-        android:text="Take or upload photos of their leaves"
-        android:textColor="#000000"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <!-- Identify State Layout -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/identifyLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible">
+
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/tvSubtitle"
+            android:layout_width="262dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="39dp"
+            android:layout_marginTop="85dp"
+            android:fontFamily="@font/eb_garamond"
+            android:lineSpacingExtra="5dp"
+            android:text="Take or upload photos of their leaves"
+            android:textColor="#000000"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Camera Area Card -->
         <androidx.cardview.widget.CardView
@@ -100,12 +72,13 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
+
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:contentDescription="Capture"
                         android:padding="20dp"
-                        android:src="@drawable/cam"
-                        android:contentDescription="Capture" />
+                        android:src="@drawable/cam" />
                 </androidx.cardview.widget.CardView>
 
                 <!-- Gallery and Flash buttons -->
@@ -120,12 +93,13 @@
                     app:cardElevation="2dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
+
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:contentDescription="Gallery"
                         android:padding="12dp"
-                        android:src="@drawable/gallery"
-                        android:contentDescription="Gallery" />
+                        android:src="@drawable/gallery" />
                 </androidx.cardview.widget.CardView>
 
                 <androidx.cardview.widget.CardView
@@ -139,12 +113,13 @@
                     app:cardElevation="2dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent">
+
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:contentDescription="Flash"
                         android:padding="12dp"
-                        android:src="@drawable/flash"
-                        android:contentDescription="Flash" />
+                        android:src="@drawable/flash" />
                 </androidx.cardview.widget.CardView>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -162,6 +137,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -169,6 +145,7 @@
                 android:orientation="vertical"
                 android:paddingStart="53dp"
                 android:paddingEnd="16dp">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -186,114 +163,182 @@
         android:id="@+id/resultLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:paddingHorizontal="32dp"
         android:visibility="gone">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/resultImageCard"
-            android:layout_width="325dp"
-            android:layout_height="325dp"
-            android:layout_marginTop="184dp"
-            app:cardCornerRadius="30dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="120dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+
             <ImageView
                 android:id="@+id/imageViewResult"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:contentDescription="Result Image" />
+                android:contentDescription="Result Image"
+                android:scaleType="centerCrop" />
         </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/cropNameText"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginStart="20dp"
             android:fontFamily="@font/instrument_sans"
-            android:textColor="#1F4D2E"
-            android:textSize="28sp"
+            android:textColor="#000000"
+            android:textSize="32sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/resultImageCard"
-            tools:text="Kamote" />
+            app:layout_constraintStart_toEndOf="@id/resultImageCard"
+            app:layout_constraintTop_toTopOf="@id/resultImageCard"
+            tools:text="Potato" />
 
         <TextView
             android:id="@+id/scientificNameText"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/instrument_sans"
-            android:textColor="#9A000000"
+            android:textColor="#333333"
             android:textSize="18sp"
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@id/cropNameText"
             app:layout_constraintTop_toBottomOf="@id/cropNameText"
-            tools:text="Ipomoea batatas" />
+            tools:text="Solanum tuberosum" />
 
         <TextView
             android:id="@+id/confidenceText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textColor="#2E7D4A"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="4dp"
+            android:textColor="#B3B3B3"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@id/cropNameText"
             app:layout_constraintTop_toBottomOf="@id/scientificNameText"
-            tools:text="98%" />
+            tools:text="96%" />
+
+        <TextView
+            android:id="@+id/tvDescriptionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/instrument_sans"
+            android:text="Description"
+            android:textColor="#000000"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/resultImageCard" />
 
         <TextView
             android:id="@+id/descriptionText"
-            android:layout_width="325dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:fontFamily="@font/instrument_sans"
-            android:gravity="center"
-            android:textColor="#000000"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/confidenceText"
-            tools:text="Crop description here..." />
+            android:lineSpacingExtra="4dp"
+            android:textColor="#444444"
+            android:textSize="15sp"
+            app:layout_constraintTop_toBottomOf="@id/tvDescriptionLabel"
+            tools:text="Potato is a widely grown root vegetable cultivated for its starchy tubers. It is a staple food in many countries and provides carbohydrates, vitamin C, and potassium." />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="120dp"
-            android:gravity="center"
-            android:orientation="horizontal"
+            android:layout_marginBottom="110dp"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent">
-            <Button
-                android:id="@+id/tryAgainButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:backgroundTint="#D9D9D9"
-                android:text="Try Again"
-                android:textAllCaps="false"
-                android:textColor="#000000" />
-            <Button
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/addToJournalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginBottom="12dp"
                 android:backgroundTint="#2E7D4A"
+                android:fontFamily="@font/instrument_sans"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:stateListAnimator="@null"
                 android:text="Add to Journal"
                 android:textAllCaps="false"
-                android:textColor="#FFFFFF" />
-            <Button
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:elevation="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/tryAgainButton"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#4DD9D9D9"
+                android:fontFamily="@font/instrument_sans"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:stateListAnimator="@null"
+                android:text="Try Again"
+                android:textAllCaps="false"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:elevation="0dp" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/importButtonResult"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="@string/import_button"
-                android:textColor="#2E7D4A"
-                android:visibility="gone" />
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="58dp"
+                android:backgroundTint="#4DD9D9D9"
+                android:fontFamily="@font/instrument_sans"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:stateListAnimator="@null"
+                android:text="Upload Photo"
+                android:textAllCaps="false"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:elevation="0dp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Header (Always on Top) -->
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/arrow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#1D1B20"
+        android:contentDescription="Back" />
+
+    <TextView
+        android:id="@+id/tvIdentifyTitleHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="26dp"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/instrument_sans"
+        android:text="Identify Crop"
+        android:textColor="#1F4D2E"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Bottom Navigation Bar Bg -->
     <View

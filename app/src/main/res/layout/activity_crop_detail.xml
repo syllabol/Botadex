@@ -39,7 +39,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavBg"
         app:layout_constraintTop_toBottomOf="@id/tvCropDetailTitle">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -64,7 +63,7 @@
                     android:layout_margin="16dp"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_launcher_background"
-                    app:shapeAppearanceOverlay="@style/wavysquare"/>
+                    app:shapeAppearanceOverlay="@style/wavysquare" />
             </FrameLayout>
 
             <!-- Crop Thumbnail Overlay (Converted to FrameLayout to remove border) -->
@@ -132,11 +131,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/instrument_sans"
+                android:paddingTop="2dp"
                 android:text="See More"
                 android:textColor="#2E7D4A"
                 android:textSize="10sp"
                 android:textStyle="bold"
-                android:paddingTop="2dp"
                 app:layout_constraintStart_toStartOf="@id/descriptionText"
                 app:layout_constraintTop_toBottomOf="@id/descriptionText" />
 
@@ -245,106 +244,123 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation -->
     <View
-        android:id="@+id/bottomNavBg"
+        android:id="@+id/bottomNavBg2"
         android:layout_width="match_parent"
         android:layout_height="63dp"
         android:background="#4DD9D9D9"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <ImageView
-        android:id="@+id/navHome"
-        android:layout_width="35dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="38dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/home__1_"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <LinearLayout
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <TextView
-        android:id="@+id/tvHomeLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="13dp"
-        android:text="Home"
-        android:textColor="#5B6B7D"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="@id/navHome"
-        app:layout_constraintStart_toStartOf="@id/navHome"
-        app:layout_constraintTop_toBottomOf="@id/navHome" />
+        <LinearLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/navLibrary"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="108dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/libr"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/home__1_" />
 
-    <TextView
-        android:id="@+id/tvLibraryLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="13dp"
-        android:text="Library"
-        android:textColor="#2E7D4A"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="@id/navLibrary"
-        app:layout_constraintStart_toStartOf="@id/navLibrary"
-        app:layout_constraintTop_toBottomOf="@id/navLibrary" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:text="Home"
+                android:textColor="#5B6B7D"
+                android:textSize="10sp" />
+        </LinearLayout>
 
-    <ImageView
-        android:id="@+id/navJournal"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="259dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/jour"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <LinearLayout
+            android:id="@+id/navLibrary"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvJournalLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="13dp"
-        android:text="Journal"
-        android:textColor="#5B6B7D"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="@id/navJournal"
-        app:layout_constraintStart_toStartOf="@id/navJournal"
-        app:layout_constraintTop_toBottomOf="@id/navJournal" />
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/libr__1_" />
 
-    <ImageView
-        android:id="@+id/navCalendar"
-        android:layout_width="35dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="322dp"
-        android:layout_marginBottom="22dp"
-        android:src="@drawable/calendar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:text="Library"
+                android:textColor="#2e7d4a"
+                android:textSize="10sp" />
+        </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvCalendarLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="13dp"
-        android:text="Calendar"
-        android:textColor="#5B6B7D"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="@id/navCalendar"
-        app:layout_constraintStart_toStartOf="@id/navCalendar"
-        app:layout_constraintTop_toBottomOf="@id/navCalendar" />
+        <!-- Placeholder for center FAB -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/navJournal"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/jour" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:text="Journal"
+                android:textColor="#5B6B7D"
+                android:textSize="10sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/navCalendar"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/calendar" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
+                android:text="Calendar"
+                android:textColor="#5B6B7D"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/navIdentify"
         android:layout_width="74dp"
-        android:layout_height="74dp"
+        android:layout_height="73dp"
         android:layout_marginBottom="15dp"
         app:cardBackgroundColor="#2E7D4A"
         app:cardCornerRadius="37dp"
-        app:cardElevation="4dp"
+        app:cardElevation="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -352,8 +368,10 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="20dp"
+            android:padding="18dp"
             android:src="@drawable/cam" />
     </androidx.cardview.widget.CardView>
+
+    <!-- Bottom Navigation -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

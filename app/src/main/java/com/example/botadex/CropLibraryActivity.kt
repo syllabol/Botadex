@@ -45,7 +45,7 @@ class CropLibraryActivity : AppCompatActivity() {
             finish()
         }
 
-        findViewById<View>(R.id.homeIcon).setOnClickListener {
+        findViewById<View>(R.id.navHome).setOnClickListener {
             val intent = Intent(this, HomeActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)

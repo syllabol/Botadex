@@ -56,6 +56,7 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite-support:+")
     implementation("androidx.exifinterface:exifinterface:1.3.6")
     implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.cardview)
 
     // CameraX
     val cameraxVersion = "1.3.1"

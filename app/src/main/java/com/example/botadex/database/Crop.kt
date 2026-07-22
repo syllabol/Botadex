@@ -15,5 +15,6 @@ data class Crop(
     val characteristics: List<String> = emptyList(),
     val culinaryUses: List<String> = emptyList(),
     val medicinalUses: List<String> = emptyList(),
-    val harvesting: String? = null
+    val harvesting: String? = null,
+    val totalDays: Int = 0
 )

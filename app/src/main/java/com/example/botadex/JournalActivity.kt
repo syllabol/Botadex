@@ -1,9 +1,11 @@
 package com.example.botadex
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -79,7 +81,6 @@ class JournalActivity : AppCompatActivity() {
         }
         rvMyCrops.adapter = myCropsAdapter
 
-        // Horizontal Swipe to Delete for My Crops (Optional, keeping as fallback)
         val swipeHandler = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(rv: RecyclerView, vh: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -133,9 +134,7 @@ class JournalActivity : AppCompatActivity() {
         findViewById<View>(R.id.navLibrary).setOnClickListener {
             startActivity(Intent(this, CropLibraryActivity::class.java))
         }
-        findViewById<View>(R.id.navJournal).setOnClickListener {
-            // Already here
-        }
+        findViewById<View>(R.id.navJournal).setOnClickListener { }
         findViewById<View>(R.id.navCalendar).setOnClickListener {
             startActivity(Intent(this, RemindersActivity::class.java))
         }
@@ -145,12 +144,12 @@ class JournalActivity : AppCompatActivity() {
     }
 
     private fun setupTabs() {
-        val tabAll = findViewById<TextView>(R.id.tabAll)
-        val tabGrowing = findViewById<TextView>(R.id.tabGrowing)
-        val tabHarvested = findViewById<TextView>(R.id.tabHarvested)
-        val tabArchived = findViewById<TextView>(R.id.tabArchived)
-
-        val tabs = listOf(tabAll, tabGrowing, tabHarvested, tabArchived)
+        val tabs = listOf<TextView>(
+            findViewById(R.id.tabAll),
+            findViewById(R.id.tabGrowing),
+            findViewById(R.id.tabHarvested),
+            findViewById(R.id.tabArchived)
+        )
 
         tabs.forEach { tab ->
             tab.setOnClickListener {
@@ -188,30 +187,32 @@ class JournalActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val collections = allCollections ?: db.cropDao().getAllCollectionsOnce()
             
-            collections.forEach { collection ->
-                updateCollectionLogic(collection)
+            val updatedCollections = mutableListOf<JournalCollection>()
+            for (collection in collections) {
+                updatedCollections.add(updateCollectionLogic(collection))
             }
 
             val filtered = if (currentFilter == "All") {
-                collections
+                updatedCollections
             } else {
-                collections.filter { it.status.equals(currentFilter, ignoreCase = true) }
+                updatedCollections.filter { it.status.equals(currentFilter, ignoreCase = true) }
             }
             myCropsAdapter.setCollections(filtered)
         }
     }
 
-    private fun updateCollectionLogic(collection: JournalCollection) {
+    private suspend fun updateCollectionLogic(collection: JournalCollection): JournalCollection {
         var updated = collection
         var needsUpdate = false
 
+        // 1. Update Current Day
         try {
             val sdf = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
             val plantedDate = sdf.parse(collection.date)
             if (plantedDate != null) {
                 val diff = Date().time - plantedDate.time
                 val days = (diff / (1000 * 60 * 60 * 24)).toInt() + 1
-                if (days != collection.currentDay && days > 0) {
+                if (days != updated.currentDay && days > 0) {
                     updated = updated.copy(currentDay = days)
                     needsUpdate = true
                 }
@@ -220,10 +221,30 @@ class JournalActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        val lastInteraction = collection.lastInteractionDate
+        // 2. Sync Target Days if it is still at default 30 or sum is needed
+        val normalizedName = updated.cropName.lowercase().trim()
+        val cropObj = db.cropDao().getCropByName(normalizedName)
+        
+        val correctTotalDays = when {
+            normalizedName.contains("cassava") -> 335
+            normalizedName.contains("tomato") -> 98
+            normalizedName.contains("potato") && !normalizedName.contains("sweet") -> 105
+            normalizedName.contains("ube") -> 270
+            normalizedName.contains("kamote") || normalizedName.contains("sweet potato") -> 140
+            normalizedName.contains("onion") -> 125
+            cropObj != null && cropObj.totalDays > 0 -> cropObj.totalDays
+            else -> 30
+        }
+
+        if (updated.targetDays != correctTotalDays && correctTotalDays != 30) {
+            updated = updated.copy(targetDays = correctTotalDays)
+            needsUpdate = true
+        }
+
+        // 3. Update Health Status
+        val lastInteraction = updated.lastInteractionDate
         val diffInteraction = System.currentTimeMillis() - lastInteraction
         val daysSinceInteraction = (diffInteraction / (1000 * 60 * 60 * 24)).toInt()
-
         val newHealth = when {
             daysSinceInteraction >= 7 -> "Warning"
             daysSinceInteraction >= 3 -> "Attention"
@@ -236,16 +257,32 @@ class JournalActivity : AppCompatActivity() {
         }
 
         if (needsUpdate) {
-            lifecycleScope.launch {
-                db.cropDao().insertCollection(updated)
-            }
+            db.cropDao().insertCollection(updated)
         }
+        
+        return updated
     }
 
     private fun showAddCollectionDialog(prefilledCrop: String? = null) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_collection, null)
         val editTitle = dialogView.findViewById<EditText>(R.id.editCollectionTitle)
         val editCrop = dialogView.findViewById<EditText>(R.id.editCropName)
+        val editDate = dialogView.findViewById<EditText>(R.id.editDatePlanted)
+
+        val calendar = Calendar.getInstance()
+        val sdf = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
+        editDate.setText(sdf.format(calendar.time))
+
+        val dateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            editDate.setText(sdf.format(calendar.time))
+        }
+
+        editDate.setOnClickListener {
+            DatePickerDialog(this, dateSetListener, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        }
         
         if (prefilledCrop != null) {
             editCrop.setText(prefilledCrop)
@@ -257,101 +294,119 @@ class JournalActivity : AppCompatActivity() {
             .setPositiveButton("Add") { _, _ ->
                 val title = editTitle.text.toString()
                 val crop = editCrop.text.toString()
+                val date = editDate.text.toString()
                 if (title.isNotEmpty()) {
-                    createCollection(title, crop)
+                    createCollection(title, crop, date)
                 }
             }
             .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun createCollection(title: String, cropName: String) {
-        val date = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault()).format(Date())
-        
-        var targetDays = 30
-        try {
-            val jsonString = assets.open("crop_library.json").bufferedReader().use { it.readText() }
-            val type = object : TypeToken<Map<String, CropInfo>>() {}.type
-            val map: Map<String, CropInfo> = Gson().fromJson(jsonString, type)
-            targetDays = when(cropName.lowercase()) {
-                "tomato" -> 60
-                "onion" -> 100
-                "potato" -> 90
-                "cassava" -> 240
-                "kamote" -> 120
+    private fun createCollection(title: String, cropName: String, date: String) {
+        lifecycleScope.launch {
+            val normalizedName = cropName.lowercase().trim()
+            val cropObj = db.cropDao().getCropByName(normalizedName)
+            val stages = db.cropDao().getGrowthStagesForCrop(normalizedName)
+            
+            var targetDays = when {
+                normalizedName.contains("cassava") -> 335
+                normalizedName.contains("tomato") -> 98
+                normalizedName.contains("potato") && !normalizedName.contains("sweet") -> 105
+                normalizedName.contains("ube") -> 270
+                normalizedName.contains("kamote") || normalizedName.contains("sweet potato") -> 140
+                normalizedName.contains("onion") -> 125
                 else -> 30
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            
+            if (cropObj != null && cropObj.totalDays > 0) {
+                targetDays = cropObj.totalDays
+            } else if (stages.isNotEmpty()) {
+                val summed = stages.sumOf { it.durationDays }
+                if (summed > 0) targetDays = summed
+            }
 
-        val collection = JournalCollection(
-            title = title, 
-            cropName = cropName, 
-            date = date,
-            status = "Growing",
-            healthStatus = "Healthy",
-            currentDay = 1,
-            targetDays = targetDays,
-            imagePath = prefillImagePath,
-            lastInteractionDate = System.currentTimeMillis()
-        )
-        lifecycleScope.launch {
+            val sdf = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
+            val plantedDateObj = try { sdf.parse(date) } catch (e: Exception) { Date() } ?: Date()
+            val diff = Date().time - plantedDateObj.time
+            val currentDay = (diff / (1000 * 60 * 60 * 24)).toInt() + 1
+
+            val collection = JournalCollection(
+                title = title, 
+                cropName = cropName, 
+                date = date,
+                status = "Growing",
+                healthStatus = "Healthy",
+                currentDay = if (currentDay > 0) currentDay else 1,
+                targetDays = targetDays,
+                imagePath = prefillImagePath,
+                lastInteractionDate = System.currentTimeMillis()
+            )
+            
             val id = db.cropDao().insertCollection(collection).toInt()
             
-            val firstEntry = JournalEntry(
-                id = 0,
-                collectionId = id,
-                cropName = title, 
-                notes = if (prefillImagePath != null) "Initial documentation from identification." else "Collection started.",
-                date = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(Date()),
-                imagePaths = prefillImagePath ?: "",
-                dayCount = 1,
-                timestamp = System.currentTimeMillis()
-            )
-            db.cropDao().insertJournalEntry(firstEntry)
+            autoScheduleReminders(title, normalizedName, stages, targetDays, plantedDateObj)
             
-            autoScheduleReminders(cropName)
-
-            Toast.makeText(this@JournalActivity, "Collection and first entry created!", Toast.LENGTH_SHORT).show()
-            prefillImagePath = null 
-            
-            val intent = Intent(this@JournalActivity, CollectionDetailActivity::class.java)
+            // Redirect directly to AddJournalEntryActivity for documentation
+            val intent = Intent(this@JournalActivity, AddJournalEntryActivity::class.java)
             intent.putExtra("COLLECTION_ID", id)
-            intent.putExtra("COLLECTION_TITLE", title)
+            intent.putExtra("IMAGE_PATH", prefillImagePath)
+            
+            prefillImagePath = null
             startActivity(intent)
         }
     }
 
-    private suspend fun autoScheduleReminders(cropName: String) {
-        val calendar = Calendar.getInstance()
+    private suspend fun autoScheduleReminders(plantTitle: String, cropName: String, stages: List<com.example.botadex.database.GrowthStageEntity>, totalDuration: Int, plantedDate: Date) {
         val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
 
-        val existingWatering = db.cropDao().getExistingReminders(cropName, "Watering")
-        if (existingWatering.isEmpty()) {
-            for (i in 1..7) {
-                calendar.add(Calendar.DAY_OF_YEAR, 2)
+        var accumulatedDays = 0
+        stages.forEach { stage ->
+            if (stage.durationDays > 0) {
+                accumulatedDays += stage.durationDays
+                val stageCal = Calendar.getInstance()
+                stageCal.time = plantedDate
+                stageCal.add(Calendar.DAY_OF_YEAR, accumulatedDays)
+                
                 val reminder = Reminder(
-                    cropName = cropName,
-                    taskType = "Watering",
-                    date = dateFormat.format(calendar.time),
-                    time = "7:00 AM",
-                    timestamp = calendar.timeInMillis
+                    cropName = plantTitle,
+                    taskType = "Growth Stage: ${stage.stage} - Day ${accumulatedDays + 1}",
+                    date = dateFormat.format(stageCal.time),
+                    time = "9:00 AM",
+                    timestamp = stageCal.timeInMillis
                 )
                 db.cropDao().insertReminder(reminder)
             }
         }
 
-        val existingFertilizer = db.cropDao().getExistingReminders(cropName, "Fertilizing")
-        if (existingFertilizer.isEmpty()) {
-            calendar.time = Date() // reset
-            calendar.add(Calendar.WEEK_OF_YEAR, 4)
+        val waterCal = Calendar.getInstance()
+        waterCal.time = plantedDate
+        var waterDay = 1
+        while (waterDay + 3 <= totalDuration) {
+            waterDay += 3
+            waterCal.add(Calendar.DAY_OF_YEAR, 3)
             val reminder = Reminder(
-                cropName = cropName,
-                taskType = "Fertilizing",
-                date = dateFormat.format(calendar.time),
+                cropName = plantTitle,
+                taskType = "Watering - Day $waterDay",
+                date = dateFormat.format(waterCal.time),
+                time = "7:00 AM",
+                timestamp = waterCal.timeInMillis
+            )
+            db.cropDao().insertReminder(reminder)
+        }
+
+        val fertCal = Calendar.getInstance()
+        fertCal.time = plantedDate
+        var fertDay = 1
+        while (fertDay + 30 <= totalDuration) {
+            fertDay += 30
+            fertCal.add(Calendar.DAY_OF_YEAR, 30)
+            val reminder = Reminder(
+                cropName = plantTitle,
+                taskType = "Fertilizing - Day $fertDay",
+                date = dateFormat.format(fertCal.time),
                 time = "8:00 AM",
-                timestamp = calendar.timeInMillis
+                timestamp = fertCal.timeInMillis
             )
             db.cropDao().insertReminder(reminder)
         }
@@ -380,7 +435,7 @@ class JournalActivity : AppCompatActivity() {
             holder.plantName.text = item.title
             holder.cropType.text = item.cropName
             holder.plantedDate.text = getString(R.string.planted_on_format, item.date)
-            holder.dayProgress.text = getString(R.string.day_progress_format, item.currentDay, item.targetDays)
+            holder.dayProgress.text = getString(R.string.day_progress_format, item.currentDay, item.targetDays, item.cropName)
             
             if (item.targetDays > 0) {
                 val progress = ((item.currentDay.toFloat() / item.targetDays) * 100).toInt()
@@ -391,7 +446,6 @@ class JournalActivity : AppCompatActivity() {
             
             holder.chipStatus.text = item.status
             updateStatusChip(holder.chipStatus, item.status)
-            
             holder.chipHealth.text = item.healthStatus
             updateHealthChip(holder.chipHealth, item.healthStatus)
 
@@ -407,7 +461,6 @@ class JournalActivity : AppCompatActivity() {
             }
 
             holder.itemView.setOnClickListener { onClick(item) }
-
             holder.itemView.setOnLongClickListener {
                 if (holder.motionLayout.currentState == R.id.start) {
                     holder.motionLayout.transitionToEnd()
@@ -416,7 +469,6 @@ class JournalActivity : AppCompatActivity() {
                 }
                 true
             }
-
             holder.deleteButton.setOnClickListener {
                 showDeleteCollectionDialog(item, holder.adapterPosition, holder.motionLayout)
             }
@@ -436,9 +488,7 @@ class JournalActivity : AppCompatActivity() {
                     view.setBackgroundResource(R.drawable.bg_chip_archived)
                     view.setTextColor(ContextCompat.getColor(this@JournalActivity, R.color.nav_inactive))
                 }
-                else -> {
-                    view.setBackgroundResource(0)
-                }
+                else -> view.setBackgroundResource(0)
             }
         }
 
@@ -456,9 +506,7 @@ class JournalActivity : AppCompatActivity() {
                     view.setBackgroundResource(R.drawable.bg_chip_warning)
                     view.setTextColor(ContextCompat.getColor(this@JournalActivity, R.color.status_warning_text))
                 }
-                else -> {
-                    view.setBackgroundResource(0)
-                }
+                else -> view.setBackgroundResource(0)
             }
         }
 

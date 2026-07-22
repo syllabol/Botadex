@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,9 +23,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.botadex.database.BotadexDatabase
+import com.example.botadex.database.DatabaseManager
 import com.example.botadex.database.JournalCollection
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class HomeActivity : AppCompatActivity() {
 
@@ -39,6 +43,11 @@ class HomeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_home)
 
         db = BotadexDatabase.getDatabase(this)
+        
+        // Ensure database is up to date with bundled data
+        lifecycleScope.launch {
+            DatabaseManager(this@HomeActivity).checkAndPerformMaintenance()
+        }
 
         // Setup ViewPager2 for Feature Cards
         vpFeatures = findViewById(R.id.vpFeatures)
@@ -132,9 +141,72 @@ class HomeActivity : AppCompatActivity() {
     private fun observeData() {
         lifecycleScope.launch {
             db.cropDao().getAllCollectionsFlow().collectLatest { collections ->
-                myCropsAdapter.setCollections(collections.take(5)) // Show only top 5 on Home
+                val updatedCollections = collections.map { updateCollectionLogic(it) }
+                myCropsAdapter.setCollections(updatedCollections.take(5)) // Show only top 5 on Home
             }
         }
+    }
+
+    private suspend fun updateCollectionLogic(collection: JournalCollection): JournalCollection {
+        var updated = collection
+        var needsUpdate = false
+
+        // 1. Update Current Day
+        try {
+            val sdf = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
+            val plantedDate = sdf.parse(collection.date)
+            if (plantedDate != null) {
+                val diff = Date().time - plantedDate.time
+                val days = (diff / (1000 * 60 * 60 * 24)).toInt() + 1
+                if (days != updated.currentDay && days > 0) {
+                    updated = updated.copy(currentDay = days)
+                    needsUpdate = true
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // 2. Sync Target Days if it is still at default 30 or sum is needed
+        val normalizedName = updated.cropName.lowercase().trim()
+        val cropObj = db.cropDao().getCropByName(normalizedName)
+        
+        val correctTotalDays = when {
+            normalizedName.contains("cassava") -> 335
+            normalizedName.contains("tomato") -> 98
+            normalizedName.contains("potato") && !normalizedName.contains("sweet") -> 105
+            normalizedName.contains("ube") -> 270
+            normalizedName.contains("kamote") || normalizedName.contains("sweet potato") -> 140
+            normalizedName.contains("onion") -> 125
+            cropObj != null && cropObj.totalDays > 0 -> cropObj.totalDays
+            else -> 30
+        }
+
+        if (updated.targetDays != correctTotalDays && correctTotalDays != 30) {
+            updated = updated.copy(targetDays = correctTotalDays)
+            needsUpdate = true
+        }
+
+        // 3. Update Health Status
+        val lastInteraction = updated.lastInteractionDate
+        val diffInteraction = System.currentTimeMillis() - lastInteraction
+        val daysSinceInteraction = (diffInteraction / (1000 * 60 * 60 * 24)).toInt()
+        val newHealth = when {
+            daysSinceInteraction >= 7 -> "Warning"
+            daysSinceInteraction >= 3 -> "Attention"
+            else -> "Healthy"
+        }
+
+        if (newHealth != updated.healthStatus) {
+            updated = updated.copy(healthStatus = newHealth)
+            needsUpdate = true
+        }
+
+        if (needsUpdate) {
+            db.cropDao().insertCollection(updated)
+        }
+        
+        return updated
     }
 
     private fun setupPaginationDots(size: Int) {
@@ -210,6 +282,14 @@ class HomeActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun getPlantedOnText(date: String): String {
+        return getString(R.string.planted_on_format, date)
+    }
+
+    private fun getDayProgressText(current: Int, target: Int, crop: String): String {
+        return getString(R.string.day_progress_format, current, target, crop)
+    }
+
     data class FeatureCard(
         val title: String,
         val desc: String,
@@ -271,8 +351,8 @@ class HomeActivity : AppCompatActivity() {
             val item = collections[position]
             holder.plantName.text = item.title
             holder.cropType.text = item.cropName
-            holder.plantedDate.text = getString(R.string.planted_on_format, item.date)
-            holder.dayProgress.text = getString(R.string.day_progress_format, item.currentDay, item.targetDays)
+            holder.plantedDate.text = getPlantedOnText(item.date)
+            holder.dayProgress.text = getDayProgressText(item.currentDay, item.targetDays, item.cropName)
 
             if (item.targetDays > 0) {
                 val progress = ((item.currentDay.toFloat() / item.targetDays) * 100).toInt()

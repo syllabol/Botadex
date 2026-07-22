@@ -9,12 +9,13 @@
     "characteristics": ["Starchy root", "Drought tolerant", "Perennial shrub", "High carbohydrate"],
     "culinary_uses": ["Cassava cake", "Boiled cassava", "Tapioca flour", "Chips"],
     "medicinal_uses": ["Anti-inflammatory", "Wound healing (leaves)", "Fever reduction"],
+    "total_days": 335,
     "growth_stages": [
-      {"stage": "Planting", "description": "Cuttings are placed in well-drained soil."},
-      {"stage": "Sprouting", "description": "Vines emerge within 1-3 weeks."},
-      {"stage": "Vegetative Growth", "description": "Rapid leaf and stem development."},
-      {"stage": "Root Formation", "description": "Carbohydrates begin storage in roots."},
-      {"stage": "Maturity", "description": "Harvestable within 8-12 months."}
+      {"stage": "Planting", "description": "Cuttings are placed in well-drained soil.", "duration_days": 14},
+      {"stage": "Sprouting", "description": "Vines emerge from the soil.", "duration_days": 21},
+      {"stage": "Vegetative Growth", "description": "Rapid leaf and stem development.", "duration_days": 90},
+      {"stage": "Root Formation", "description": "Carbohydrates begin storage in roots.", "duration_days": 120},
+      {"stage": "Maturity", "description": "Harvestable roots.", "duration_days": 90}
     ],
     "harvesting": "Harvest when leaves turn yellow and fall."
   },
@@ -28,12 +29,13 @@
     "characteristics": ["Red fruit", "Vining growth", "Vitamin C source", "Warm season"],
     "culinary_uses": ["Salads", "Pasta sauces", "Ketchup", "Soups"],
     "medicinal_uses": ["Antioxidant", "Eye health", "Skin health"],
+    "total_days": 98,
     "growth_stages": [
-      {"stage": "Planting", "description": "Seeds sown in nursery or direct."},
-      {"stage": "Sprouting", "description": "First leaves appear in 5-10 days."},
-      {"stage": "Flowering", "description": "Yellow flowers indicate upcoming fruit."},
-      {"stage": "Fruiting", "description": "Green fruits develop and turn red."},
-      {"stage": "Maturity", "description": "Full red color indicates harvest ready."}
+      {"stage": "Planting", "description": "Seeds sown in nursery or direct.", "duration_days": 7},
+      {"stage": "Sprouting", "description": "First leaves appear.", "duration_days": 14},
+      {"stage": "Flowering", "description": "Yellow flowers indicate upcoming fruit.", "duration_days": 28},
+      {"stage": "Fruiting", "description": "Green fruits develop and turn red.", "duration_days": 35},
+      {"stage": "Maturity", "description": "Full red color indicates harvest ready.", "duration_days": 14}
     ],
     "harvesting": "Pick when firm and fully colored."
   },
@@ -47,12 +49,13 @@
     "characteristics": ["Underground tuber", "Herbaceous perennial", "Starch heavy", "Cool climate"],
     "culinary_uses": ["French fries", "Mashed potatoes", "Potato salad", "Baked"],
     "medicinal_uses": ["Digestive health", "Potassium source", "Blood pressure"],
+    "total_days": 105,
     "growth_stages": [
-      {"stage": "Planting", "description": "Seed potatoes placed in ridges."},
-      {"stage": "Sprouting", "description": "Shoots emerge from the soil."},
-      {"stage": "Stolon Growth", "description": "Lateral stems grow underground."},
-      {"stage": "Tuber Initiation", "description": "Tubers begin to swell at stolon ends."},
-      {"stage": "Maturity", "description": "Vines die back, skin toughens."}
+      {"stage": "Planting", "description": "Seed potatoes placed in ridges.", "duration_days": 14},
+      {"stage": "Sprouting", "description": "Shoots emerge from the soil.", "duration_days": 21},
+      {"stage": "Stolon Growth", "description": "Lateral stems grow underground.", "duration_days": 21},
+      {"stage": "Tuber Initiation", "description": "Tubers begin to swell at stolon ends.", "duration_days": 28},
+      {"stage": "Maturity", "description": "Vines die back, skin toughens.", "duration_days": 21}
     ],
     "harvesting": "Harvest after vines have naturally died."
   },
@@ -65,13 +68,14 @@
     "uses": "Used in Filipino desserts and ice cream.",
     "characteristics": ["Purple flesh", "Sweet flavor", "Vine plant", "Tropical crop"],
     "culinary_uses": ["Ube halaya", "Ice cream", "Cakes", "Pastries"],
-    "medicinal_uses": ["Antioxidant", "Anthocyanin source", "Anti-aging"],
+    "medicinal_uses": ["Antioxidant", "Heart health"],
+    "total_days": 270,
     "growth_stages": [
-      {"stage": "Planting", "description": "Tuber sets planted in mounds."},
-      {"stage": "Vining", "description": "Climbing stems require support."},
-      {"stage": "Leaf Development", "description": "Vigorous foliage growth."},
-      {"stage": "Tuber Bulking", "description": "Underground yam expansion."},
-      {"stage": "Maturity", "description": "Foliage senesces in 7-9 months."}
+      {"stage": "Planting", "description": "Tuber sets planted in mounds.", "duration_days": 30},
+      {"stage": "Vining", "description": "Climbing stems require support.", "duration_days": 60},
+      {"stage": "Leaf Development", "description": "Vigorous foliage growth.", "duration_days": 90},
+      {"stage": "Tuber Bulking", "description": "Underground yam expansion.", "duration_days": 60},
+      {"stage": "Maturity", "description": "Foliage senesces.", "duration_days": 30}
     ],
     "harvesting": "Harvest when vines turn brown and dry."
   },
@@ -85,12 +89,13 @@
     "characteristics": ["Sweet tuber", "Edible leaves", "Creeping vine", "High Vitamin A"],
     "culinary_uses": ["Kamote cue", "Roasted kamote", "Salads", "Boiled"],
     "medicinal_uses": ["Vitamin A source", "Blood sugar regulation", "Antiviral"],
+    "total_days": 140,
     "growth_stages": [
-      {"stage": "Planting", "description": "Cuttings (slips) planted in ridges."},
-      {"stage": "Vining", "description": "Vines spread across the ground."},
-      {"stage": "Leaf Expansion", "description": "Dense ground cover forms."},
-      {"stage": "Tuber Initiation", "description": "Roots start to thicken into tubers."},
-      {"stage": "Maturity", "description": "Harvestable in 3-5 months."}
+      {"stage": "Planting", "description": "Cuttings (slips) planted in ridges.", "duration_days": 10},
+      {"stage": "Vining", "description": "Vines spread across the ground.", "duration_days": 30},
+      {"stage": "Leaf Expansion", "description": "Dense ground cover forms.", "duration_days": 30},
+      {"stage": "Tuber Initiation", "description": "Roots start to thicken into tubers.", "duration_days": 40},
+      {"stage": "Maturity", "description": "Harvestable tubers.", "duration_days": 30}
     ],
     "harvesting": "Harvest carefully to avoid bruising."
   },
@@ -103,13 +108,14 @@
     "uses": "Used as a base for many dishes, can be eaten raw, cooked, or pickled.",
     "characteristics": ["Bulb vegetable", "Pungent flavor", "Hollow leaves", "Layered structure"],
     "culinary_uses": ["Sautéed onions", "Onion rings", "Salads", "Soups"],
-    "medicinal_uses": ["Antibacterial", "Quercetin source", "Heart health"],
+    "medicinal_uses": ["Antibacterial", "Heart health"],
+    "total_days": 125,
     "growth_stages": [
-      {"stage": "Planting", "description": "Seeds, sets, or transplants are placed in fertile soil."},
-      {"stage": "Sprouting", "description": "Green shoots emerge from the soil."},
-      {"stage": "Leaf Development", "description": "Foliage grows to provide energy for the bulb."},
-      {"stage": "Bulb Initiation", "description": "Base of the plant starts to swell into a bulb."},
-      {"stage": "Maturity", "description": "Leaves fall over and turn brown."}
+      {"stage": "Planting", "description": "Seeds, sets, or transplants are placed in fertile soil.", "duration_days": 14},
+      {"stage": "Sprouting", "description": "Green shoots emerge from the soil.", "duration_days": 14},
+      {"stage": "Leaf Development", "description": "Foliage grows to provide energy for the bulb.", "duration_days": 42},
+      {"stage": "Bulb Initiation", "description": "Base of the plant starts to swell into a bulb.", "duration_days": 35},
+      {"stage": "Maturity", "description": "Leaves fall over and turn brown.", "duration_days": 20}
     ],
     "harvesting": "Harvest when tops turn yellow and fall over."
   }
