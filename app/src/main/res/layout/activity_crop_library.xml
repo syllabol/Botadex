@@ -15,8 +15,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:contentDescription="Back"
-        android:rotationY="-180"
-        android:src="@drawable/arrow"
+        android:src="@drawable/abc_ic_ab_back_material"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="#1D1B20" />

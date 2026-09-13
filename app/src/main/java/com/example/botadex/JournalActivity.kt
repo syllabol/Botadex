@@ -1,9 +1,13 @@
 package com.example.botadex
 
 import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,6 +22,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -44,6 +49,7 @@ class JournalActivity : AppCompatActivity() {
 
     private var currentFilter = "All"
     private var prefillImagePath: String? = null
+    private var detectedHealth: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +64,8 @@ class JournalActivity : AppCompatActivity() {
 
         val prefillCrop = intent.getStringExtra("PREFILL_CROP_NAME")
         prefillImagePath = intent.getStringExtra("PREFILL_IMAGE_PATH")
+        detectedHealth = intent.getStringExtra("DETECTED_HEALTH")
+
         if (prefillCrop != null) {
             showAddCollectionDialog(prefillCrop)
         } else {
@@ -241,14 +249,18 @@ class JournalActivity : AppCompatActivity() {
             needsUpdate = true
         }
 
-        // 3. Update Health Status
+        // 3. Update Health Status from latest reading/interaction
+        val entries = db.cropDao().getJournalEntriesByCollection(collection.id)
+        val latestEntry = entries.firstOrNull()
+        val baseHealth = latestEntry?.healthStatus ?: updated.healthStatus
+
         val lastInteraction = updated.lastInteractionDate
         val diffInteraction = System.currentTimeMillis() - lastInteraction
         val daysSinceInteraction = (diffInteraction / (1000 * 60 * 60 * 24)).toInt()
         val newHealth = when {
             daysSinceInteraction >= 7 -> "Warning"
-            daysSinceInteraction >= 3 -> "Attention"
-            else -> "Healthy"
+            daysSinceInteraction >= 3 -> if (baseHealth.lowercase() == "healthy") "Attention" else baseHealth
+            else -> baseHealth
         }
 
         if (newHealth != updated.healthStatus) {
@@ -261,6 +273,27 @@ class JournalActivity : AppCompatActivity() {
         }
         
         return updated
+    }
+
+    private fun updateHealthChipStyle(view: TextView, health: String) {
+        val healthLower = health.lowercase(Locale.getDefault())
+        when {
+            healthLower == "healthy" -> {
+                view.text = "Healthy"
+                view.setBackgroundResource(R.drawable.bg_chip_growing)
+                view.setTextColor(ContextCompat.getColor(this, R.color.status_healthy_text))
+            }
+            healthLower == "attention" -> {
+                view.text = "Attention"
+                view.setBackgroundResource(R.drawable.bg_chip_attention)
+                view.setTextColor(ContextCompat.getColor(this, R.color.status_attention_text))
+            }
+            else -> {
+                view.text = if (healthLower == "warning") "Warning" else health
+                view.setBackgroundResource(R.drawable.bg_chip_warning)
+                view.setTextColor(ContextCompat.getColor(this, R.color.status_warning_text))
+            }
+        }
     }
 
     private fun showAddCollectionDialog(prefilledCrop: String? = null) {
@@ -336,7 +369,7 @@ class JournalActivity : AppCompatActivity() {
                 cropName = cropName, 
                 date = date,
                 status = "Growing",
-                healthStatus = "Healthy",
+                healthStatus = detectedHealth ?: "Healthy",
                 currentDay = if (currentDay > 0) currentDay else 1,
                 targetDays = targetDays,
                 imagePath = prefillImagePath,
@@ -351,14 +384,18 @@ class JournalActivity : AppCompatActivity() {
             val intent = Intent(this@JournalActivity, AddJournalEntryActivity::class.java)
             intent.putExtra("COLLECTION_ID", id)
             intent.putExtra("IMAGE_PATH", prefillImagePath)
+            intent.putExtra("DETECTED_HEALTH", detectedHealth)
             
             prefillImagePath = null
+            detectedHealth = null
             startActivity(intent)
         }
     }
 
     private suspend fun autoScheduleReminders(plantTitle: String, cropName: String, stages: List<com.example.botadex.database.GrowthStageEntity>, totalDuration: Int, plantedDate: Date) {
         val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
+
+        val remindersToSchedule = mutableListOf<Reminder>()
 
         var accumulatedDays = 0
         stages.forEach { stage ->
@@ -368,48 +405,112 @@ class JournalActivity : AppCompatActivity() {
                 stageCal.time = plantedDate
                 stageCal.add(Calendar.DAY_OF_YEAR, accumulatedDays)
                 
+                // Rework: Set time to 9:00 AM
+                stageCal.set(Calendar.HOUR_OF_DAY, 9)
+                stageCal.set(Calendar.MINUTE, 0)
+                stageCal.set(Calendar.SECOND, 0)
+                stageCal.set(Calendar.MILLISECOND, 0)
+
                 val reminder = Reminder(
-                    cropName = plantTitle,
+                    plantName = plantTitle,
                     taskType = "Growth Stage: ${stage.stage} - Day ${accumulatedDays + 1}",
                     date = dateFormat.format(stageCal.time),
                     time = "9:00 AM",
                     timestamp = stageCal.timeInMillis
                 )
-                db.cropDao().insertReminder(reminder)
+                remindersToSchedule.add(reminder)
             }
         }
 
         val waterCal = Calendar.getInstance()
         waterCal.time = plantedDate
+        // Base time for watering: 7:00 AM
+        waterCal.set(Calendar.HOUR_OF_DAY, 7)
+        waterCal.set(Calendar.MINUTE, 0)
+        waterCal.set(Calendar.SECOND, 0)
+        waterCal.set(Calendar.MILLISECOND, 0)
+
         var waterDay = 1
         while (waterDay + 3 <= totalDuration) {
             waterDay += 3
             waterCal.add(Calendar.DAY_OF_YEAR, 3)
             val reminder = Reminder(
-                cropName = plantTitle,
+                plantName = plantTitle,
                 taskType = "Watering - Day $waterDay",
                 date = dateFormat.format(waterCal.time),
                 time = "7:00 AM",
                 timestamp = waterCal.timeInMillis
             )
-            db.cropDao().insertReminder(reminder)
+            remindersToSchedule.add(reminder)
         }
 
         val fertCal = Calendar.getInstance()
         fertCal.time = plantedDate
+        // Base time for fertilizing: 8:00 AM
+        fertCal.set(Calendar.HOUR_OF_DAY, 8)
+        fertCal.set(Calendar.MINUTE, 0)
+        fertCal.set(Calendar.SECOND, 0)
+        fertCal.set(Calendar.MILLISECOND, 0)
+
         var fertDay = 1
         while (fertDay + 30 <= totalDuration) {
             fertDay += 30
             fertCal.add(Calendar.DAY_OF_YEAR, 30)
             val reminder = Reminder(
-                cropName = plantTitle,
+                plantName = plantTitle,
                 taskType = "Fertilizing - Day $fertDay",
                 date = dateFormat.format(fertCal.time),
                 time = "8:00 AM",
                 timestamp = fertCal.timeInMillis
             )
-            db.cropDao().insertReminder(reminder)
+            remindersToSchedule.add(reminder)
         }
+        
+        // Rework: Add Harvesting reminder at the end of the duration
+        val harvestCal = Calendar.getInstance()
+        harvestCal.time = plantedDate
+        harvestCal.add(Calendar.DAY_OF_YEAR, totalDuration)
+        harvestCal.set(Calendar.HOUR_OF_DAY, 7)
+        harvestCal.set(Calendar.MINUTE, 0)
+        harvestCal.set(Calendar.SECOND, 0)
+        harvestCal.set(Calendar.MILLISECOND, 0)
+        
+        val harvestReminder = Reminder(
+            plantName = plantTitle,
+            taskType = "Harvesting - Day $totalDuration",
+            date = dateFormat.format(harvestCal.time),
+            time = "7:00 AM",
+            timestamp = harvestCal.timeInMillis
+        )
+        remindersToSchedule.add(harvestReminder)
+
+        // Insert and schedule
+        remindersToSchedule.forEach { reminder ->
+            val id = db.cropDao().insertReminder(reminder)
+            scheduleAlarm(reminder.copy(id = id.toInt()))
+        }
+    }
+
+    private fun scheduleAlarm(reminder: Reminder) {
+        if (reminder.timestamp <= System.currentTimeMillis()) return
+
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, ReminderReceiver::class.java).apply {
+            action = ReminderReceiver.ACTION_REMIND_PREFIX + reminder.id
+            putExtra(ReminderReceiver.EXTRA_PLANT_NAME, reminder.plantName)
+            putExtra(ReminderReceiver.EXTRA_TASK_TYPE, reminder.taskType)
+            putExtra(ReminderReceiver.EXTRA_REMINDER_ID, reminder.id)
+            data = "botadex://reminder/${reminder.id}".toUri()
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            reminder.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminder.timestamp, pendingIntent)
     }
 
     inner class MyCropsAdapter(private val onClick: (JournalCollection) -> Unit) : 
@@ -446,8 +547,7 @@ class JournalActivity : AppCompatActivity() {
             
             holder.chipStatus.text = item.status
             updateStatusChip(holder.chipStatus, item.status)
-            holder.chipHealth.text = item.healthStatus
-            updateHealthChip(holder.chipHealth, item.healthStatus)
+            updateHealthChipStyle(holder.chipHealth, item.healthStatus)
 
             if (item.imagePath != null) {
                 val bitmap = BitmapFactory.decodeFile(item.imagePath)
@@ -492,24 +592,6 @@ class JournalActivity : AppCompatActivity() {
             }
         }
 
-        private fun updateHealthChip(view: TextView, health: String) {
-            when (health) {
-                "Healthy" -> {
-                    view.setBackgroundResource(R.drawable.bg_chip_growing)
-                    view.setTextColor(ContextCompat.getColor(this@JournalActivity, R.color.status_healthy_text))
-                }
-                "Attention" -> {
-                    view.setBackgroundResource(R.drawable.bg_chip_attention)
-                    view.setTextColor(ContextCompat.getColor(this@JournalActivity, R.color.status_attention_text))
-                }
-                "Warning" -> {
-                    view.setBackgroundResource(R.drawable.bg_chip_warning)
-                    view.setTextColor(ContextCompat.getColor(this@JournalActivity, R.color.status_warning_text))
-                }
-                else -> view.setBackgroundResource(0)
-            }
-        }
-
         override fun getItemCount() = collections.size
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -544,6 +626,8 @@ class JournalActivity : AppCompatActivity() {
             val entry = entries[position]
             holder.title.text = "${entry.cropName} - Day ${entry.dayCount}"
             holder.notes.text = entry.notes
+            
+            updateHealthChipStyle(holder.health, entry.healthStatus)
             
             try {
                 val sdfInput = if (entry.date.contains("/")) {
@@ -583,6 +667,7 @@ class JournalActivity : AppCompatActivity() {
             val year: TextView = view.findViewById(R.id.tvEntryYear)
             val title: TextView = view.findViewById(R.id.tvEntryTitle)
             val notes: TextView = view.findViewById(R.id.tvEntryNotes)
+            val health: TextView = view.findViewById(R.id.tvEntryHealth)
             val image: ImageView = view.findViewById(R.id.ivEntryImage)
         }
     }

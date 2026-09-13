@@ -16,5 +16,7 @@ data class Crop(
     val culinaryUses: List<String> = emptyList(),
     val medicinalUses: List<String> = emptyList(),
     val harvesting: String? = null,
-    val totalDays: Int = 0
+    val totalDays: Int = 0,
+    val imageUri: String? = null,
+    val galleryImages: List<String> = emptyList()
 )

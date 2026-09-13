@@ -4,77 +4,78 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="@color/background_light">
 
     <!-- Header Section -->
-    <View
-        android:id="@+id/headerBackground"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:background="#458C60"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <ImageButton
         android:id="@+id/backButton"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="28dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
         android:src="@drawable/abc_ic_ab_back_material"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#FFFFFF" />
+        app:tint="#1D1B20"
+        android:contentDescription="Back" />
 
     <TextView
         android:id="@+id/titleText"
-        android:layout_width="220dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="8dp"
-        android:text="Plant Journal"
-        android:textColor="#FFFFFF"
-        android:textSize="32sp"
-        android:textStyle="bold|italic"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/instrument_sans"
+        android:text="Add Journal Entry"
+        android:textColor="@color/text_green_dark"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="@id/backButton"
+        app:layout_constraintEnd_toStartOf="@+id/compareButton"
         app:layout_constraintStart_toEndOf="@id/backButton"
+        app:layout_constraintTop_toTopOf="@id/backButton" />
+
+    <TextView
+        android:id="@+id/compareButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="@font/instrument_sans"
+        android:text="Compare"
+        android:textColor="@color/brand_green"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"
+        app:layout_constraintEnd_toStartOf="@+id/saveJournalButtonTop"
         app:layout_constraintTop_toTopOf="@id/backButton" />
 
     <ImageButton
         android:id="@+id/saveJournalButtonTop"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/circle_white_bg"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="24dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_menu_save"
-        app:layout_constraintBottom_toBottomOf="@id/titleText"
+        app:layout_constraintBottom_toBottomOf="@id/backButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/titleText"
-        app:tint="#4CAF50" />
-
-    <TextView
-        android:id="@+id/subtitleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Track your farming journey"
-        android:textColor="#E0E0E0"
-        android:textSize="14sp"
-        android:textStyle="italic"
-        app:layout_constraintStart_toStartOf="@id/titleText"
-        app:layout_constraintTop_toBottomOf="@id/titleText" />
+        app:layout_constraintTop_toTopOf="@id/backButton"
+        app:tint="@color/brand_green"
+        android:contentDescription="Save Entry" />
 
     <!-- Content Section -->
-    <ScrollView
-        android:layout_width="0dp"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/headerBackground">
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBg"
+        app:layout_constraintTop_toBottomOf="@id/titleText"
+        android:layout_marginTop="16dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -93,33 +94,71 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:listitem="@layout/item_journal_image" />
 
+            <!-- Health Status Chip Layout -->
+            <LinearLayout
+                android:id="@+id/healthStatusLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/imagesRecyclerView"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <TextView
+                    android:id="@+id/journalHealthChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:background="@drawable/bg_chip_growing"
+                    android:fontFamily="@font/instrument_sans"
+                    android:text="Healthy"
+                    android:textColor="@color/status_healthy_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/journalDiseaseChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp"
+                    android:background="@drawable/bg_chip_warning"
+                    android:fontFamily="@font/instrument_sans"
+                    android:text="Disease"
+                    android:textColor="@color/status_warning_text"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:visibility="gone" />
+            </LinearLayout>
+
             <!-- Inputs -->
             <TextView
                 android:id="@+id/labelCropName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:fontFamily="@font/bakbak_one"
-                android:text="Crop Name"
-                android:textColor="#000000"
-                android:textSize="20sp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/instrument_sans"
+                android:text="Entry Title"
+                android:textColor="@color/text_green_dark"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/imagesRecyclerView" />
+                app:layout_constraintTop_toBottomOf="@id/healthStatusLayout" />
 
             <EditText
                 android:id="@+id/journalCropName"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:hint="Insert Crop Name"
-                android:paddingVertical="4dp"
-                android:textColor="#9E9E9E"
-                android:textColorHint="#BDBDBD"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_border_thin"
+                android:hint="e.g. Day 1: Planting"
+                android:padding="12dp"
+                android:textColor="@color/black"
+                android:textSize="14sp"
                 app:layout_constraintTop_toBottomOf="@id/labelCropName" />
 
             <TextView
@@ -127,91 +166,96 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:fontFamily="@font/bakbak_one"
+                android:fontFamily="@font/instrument_sans"
                 android:text="Date"
-                android:textColor="#000000"
-                android:textSize="20sp"
+                android:textColor="@color/text_green_dark"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/journalCropName" />
 
             <EditText
                 android:id="@+id/journalDate"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:hint="MM/DD/YYYY"
-                android:paddingVertical="4dp"
-                android:textColor="#9E9E9E"
-                android:textColorHint="#BDBDBD"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_border_thin"
+                android:clickable="true"
+                android:focusable="false"
+                android:hint="Select Date"
+                android:padding="12dp"
+                android:textColor="@color/black"
+                android:textSize="14sp"
                 app:layout_constraintTop_toBottomOf="@id/labelDate" />
 
             <TextView
-                android:id="@+id/labelDocumentations"
+                android:id="@+id/labelNotes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:fontFamily="@font/bakbak_one"
-                android:text="Documentations"
-                android:textColor="#000000"
-                android:textSize="20sp"
+                android:fontFamily="@font/instrument_sans"
+                android:text="Notes &amp; Observations"
+                android:textColor="@color/text_green_dark"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/journalDate" />
 
             <EditText
                 android:id="@+id/journalNotes"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:hint="Insert Description Here"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rounded_border_thin"
+                android:gravity="top"
+                android:hint="How is your crop doing?"
                 android:inputType="textMultiLine"
-                android:paddingVertical="4dp"
-                android:textColor="#9E9E9E"
-                android:textColorHint="#BDBDBD"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/labelDocumentations" />
+                android:minLines="5"
+                android:padding="12dp"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintTop_toBottomOf="@id/labelNotes" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation Bar Area -->
+    <View
+        android:id="@+id/bottomNavBg"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
+        android:background="#4DD9D9D9"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
     <LinearLayout
         android:id="@+id/bottomNavigation"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#458C60"
+        android:layout_width="match_parent"
+        android:layout_height="63dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
-            android:id="@+id/navIdentify"
+            android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_camera"
-                app:tint="#E0E0E0" />
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/home__1_" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Identify"
-                android:textColor="#E0E0E0"
+                android:fontFamily="@font/inter"
+                android:text="Home"
+                android:textColor="@color/nav_inactive"
                 android:textSize="10sp" />
         </LinearLayout>
 
@@ -221,22 +265,30 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_library_books"
-                android:visibility="visible"
-                app:tint="#9AE0E0E0" />
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/libr" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
                 android:text="Library"
-                android:textColor="#E0E0E0"
+                android:textColor="@color/nav_inactive"
                 android:textSize="10sp" />
         </LinearLayout>
+
+        <!-- Placeholder for center FAB -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
         <LinearLayout
             android:id="@+id/navJournal"
@@ -244,21 +296,22 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:foreground="@android:drawable/ic_menu_edit"
-                android:foregroundTint="#FFFFFF"
-                android:src="@android:drawable/ic_menu_edit"
-                app:tint="#FFFFFF" />
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/journal" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
                 android:text="Journal"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/brand_green"
                 android:textSize="10sp" />
         </LinearLayout>
 
@@ -268,21 +321,44 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                app:tint="#E0E0E0" />
+                android:layout_width="35dp"
+                android:layout_height="36dp"
+                android:src="@drawable/calendar" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/inter"
                 android:text="Calendar"
-                android:textColor="#E0E0E0"
+                android:textColor="@color/nav_inactive"
                 android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Floating Camera Button -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/navIdentify"
+        android:layout_width="74dp"
+        android:layout_height="73dp"
+        android:layout_marginBottom="15dp"
+        app:cardBackgroundColor="#2E7D4A"
+        app:cardCornerRadius="37dp"
+        app:cardElevation="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="18dp"
+            android:src="@drawable/cam" />
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

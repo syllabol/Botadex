@@ -7,31 +7,37 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import androidx.viewpager2.widget.ViewPager2
+import com.example.botadex.admin.AdminDashboardActivity
+import com.example.botadex.database.BotadexDatabase
+import com.example.botadex.database.Crop
+import com.example.botadex.database.GrowthStageEntity
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.launch
 
 class CropDetailActivity : AppCompatActivity() {
 
-    private var crop: CropInfo? = null
+    private var crop: Crop? = null
+    private var stages: List<GrowthStageEntity> = emptyList()
     private lateinit var tabContentContainer: FrameLayout
     private var isDescriptionExpanded = false
+    private var adminTapCount = 0
+    private var lastTapTime: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_crop_detail)
 
         val cropName = intent.getStringExtra("CROP_NAME") ?: return
-        val allCrops = loadCropData()
-        crop = allCrops[cropName.lowercase()] ?: return
-
-        setupHeader(cropName)
-        setupDescription()
-        setupTabs()
-
+        
+        tabContentContainer = findViewById(R.id.tabContentContainer)
         findViewById<View>(R.id.backButton).setOnClickListener { finish() }
 
         // Bottom Navigation
@@ -51,46 +57,117 @@ class CropDetailActivity : AppCompatActivity() {
             startActivity(Intent(this, RemindersActivity::class.java))
         }
 
-        // Initial tab content
-        updateTabContent(0)
+        setupAdminShortcut()
+        loadCropData(cropName)
     }
 
-    private fun setupHeader(cropName: String) {
-        val displayName = if (crop?.name.isNullOrEmpty()) {
-            cropName.replaceFirstChar { it.uppercase() }
-        } else {
-            crop?.name ?: ""
+    private fun loadCropData(name: String) {
+        lifecycleScope.launch {
+            val db = BotadexDatabase.getDatabase(this@CropDetailActivity)
+            crop = db.cropDao().getCropByName(name.lowercase())
+            stages = db.cropDao().getGrowthStagesForCrop(name.lowercase())
+
+            if (crop != null) {
+                setupHeader()
+                setupDescription()
+                setupTabs()
+                updateTabContent(0)
+            } else {
+                Toast.makeText(this@CropDetailActivity, "Crop not found in database", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
+    }
+
+    private fun setupAdminShortcut() {
+        val title = findViewById<TextView>(R.id.tvCropDetailTitle)
+        title.setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastTapTime < 500) {
+                adminTapCount++
+            } else {
+                adminTapCount = 1
+            }
+            lastTapTime = currentTime
+
+            if (adminTapCount >= 3) {
+                adminTapCount = 0
+                startActivity(Intent(this, AdminDashboardActivity::class.java))
+                Toast.makeText(this, "Admin Mode Entered", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun setupHeader() {
+        val displayName = crop?.name?.replaceFirstChar { it.uppercase() } ?: ""
 
         findViewById<TextView>(R.id.cropNameText).text = displayName
         findViewById<TextView>(R.id.scientificNameText).text = crop?.scientificName ?: ""
         
         val thumbnail = findViewById<ImageView>(R.id.cropThumbnail)
-        val fullImage = findViewById<ImageView>(R.id.cropFullImage)
+        val imagePager = findViewById<ViewPager2>(R.id.cropImagePager)
+        val imageIndicator = findViewById<TabLayout>(R.id.cropImageIndicator)
 
-        val iconId = when (displayName.lowercase()) {
-            "cassava" -> R.drawable.cassava
-            "tomato" -> R.drawable.tomato
-            "potato" -> R.drawable.potato
-            "ube" -> R.drawable.ube
-            "kamote" -> R.drawable.kamote
-            "onion" -> R.drawable.onion
-            else -> R.drawable.ic_launcher_foreground
+        val imageResIds = mutableListOf<Int>()
+
+        // Load gallery images (up to 5)
+        crop?.galleryImages?.take(5)?.forEach { uri ->
+            val resId = resources.getIdentifier(uri, "drawable", packageName)
+            if (resId != 0) imageResIds.add(resId)
         }
 
-        val leafId = when (displayName.lowercase()) {
-            "cassava" -> R.drawable.cassavaleaf
-            "tomato" -> R.drawable.tomatoleaf
-            "potato" -> R.drawable.potatoleaf
-            "ube" -> R.drawable.ubeleaf
-            "kamote" -> R.drawable.kamoteleaf
-            "onion" -> R.drawable.onionleaf
-            else -> R.drawable.ic_launcher_background
+        // Fallback to imageUri if gallery is empty
+        if (imageResIds.isEmpty()) {
+            val mainImageResId = if (!crop?.imageUri.isNullOrBlank()) {
+                resources.getIdentifier(crop?.imageUri, "drawable", packageName)
+            } else {
+                0
+            }
+            if (mainImageResId != 0) {
+                imageResIds.add(mainImageResId)
+            }
         }
 
+        // Hardcoded Fallbacks if still empty
+        if (imageResIds.isEmpty()) {
+            val leafId = when (displayName.lowercase()) {
+                "cassava" -> R.drawable.cassavaleaf
+                "tomato" -> R.drawable.tomatoleaf
+                "potato" -> R.drawable.potatoleaf
+                "ube" -> R.drawable.ubeleaf
+                "kamote" -> R.drawable.kamoteleaf
+                "onion" -> R.drawable.onionleaf
+                else -> R.drawable.ic_launcher_background
+            }
+            imageResIds.add(leafId)
+        }
 
-        thumbnail.setImageResource(iconId)
-        fullImage.setImageResource(leafId)
+        // Setup ViewPager
+        imagePager.adapter = CropImageAdapter(imageResIds)
+        
+        // Setup Indicator
+        if (imageResIds.size > 1) {
+            imageIndicator.visibility = View.VISIBLE
+            TabLayoutMediator(imageIndicator, imagePager) { _, _ -> }.attach()
+        } else {
+            imageIndicator.visibility = View.GONE
+        }
+
+        // Setup Thumbnail
+        val thumbnailResId = if (!crop?.imageUri.isNullOrBlank()) {
+            resources.getIdentifier(crop?.imageUri, "drawable", packageName)
+        } else {
+            when (displayName.lowercase()) {
+                "cassava" -> R.drawable.cassava
+                "tomato" -> R.drawable.tomato
+                "potato" -> R.drawable.potato
+                "ube" -> R.drawable.ube
+                "kamote" -> R.drawable.kamote
+                "onion" -> R.drawable.onion
+                else -> R.drawable.ic_launcher_foreground
+            }
+        }
+        thumbnail.setImageResource(thumbnailResId)
     }
 
     private fun setupDescription() {
@@ -115,7 +192,6 @@ class CropDetailActivity : AppCompatActivity() {
     }
 
     private fun setupTabs() {
-        tabContentContainer = findViewById(R.id.tabContentContainer)
         val tabCare = findViewById<TextView>(R.id.tabCareGuide)
         val tabUses = findViewById<TextView>(R.id.tabCropUses)
         val tabStages = findViewById<TextView>(R.id.tabGrowthStages)
@@ -181,23 +257,30 @@ class CropDetailActivity : AppCompatActivity() {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.cropUsesRecycler)
                 
                 val items = mutableListOf<DetailItem>()
+                val cropName = crop?.name?.lowercase() ?: ""
+                val culinaryIcon = R.drawable.ic_culinary
+                val medicinalIcon = R.drawable.ic_medicinal
+
+                // 2. Culinary section
+                // Passing the specific icon to the header
+                items.add(DetailItem(getString(R.string.culinary), "", culinaryIcon))
                 
-                // Culinary section (At least 4 items)
-                items.add(DetailItem(getString(R.string.culinary), ""))
                 val culinary = crop?.culinaryUses ?: emptyList()
-                for (i in 0 until maxOf(4, culinary.size)) {
-                    val title = if (i < culinary.size) "Culinary Use ${i + 1}" else "Additional Use"
-                    val desc = culinary.getOrNull(i) ?: "Learn more in the field guide."
-                    items.add(DetailItem(title, desc))
+                if (culinary.isEmpty()) {
+                    items.add(DetailItem("Uses", crop?.uses ?: "No information available.", culinaryIcon))
+                } else {
+                    culinary.forEachIndexed { i, use ->
+                        // Passing the specific icon to each list item
+                        items.add(DetailItem("Culinary Use ${i + 1}", use, culinaryIcon))
+                    }
                 }
                 
-                // Medicinal section (At least 4 items)
-                items.add(DetailItem(getString(R.string.medicinal), ""))
+                // 3. Medicinal section
+                items.add(DetailItem(getString(R.string.medicinal), "", medicinalIcon))
+                
                 val medicinal = crop?.medicinalUses ?: emptyList()
-                for (i in 0 until maxOf(4, medicinal.size)) {
-                    val title = if (i < medicinal.size) "Medicinal Use ${i + 1}" else "Additional Remedy"
-                    val desc = medicinal.getOrNull(i) ?: "Traditional uses vary by region."
-                    items.add(DetailItem(title, desc))
+                medicinal.forEachIndexed { i, use ->
+                    items.add(DetailItem("Medicinal Use ${i + 1}", use, medicinalIcon))
                 }
 
                 recyclerView.layoutManager = LinearLayoutManager(this)
@@ -208,21 +291,14 @@ class CropDetailActivity : AppCompatActivity() {
                 val view = inflater.inflate(R.layout.tab_growth_stages, tabContentContainer, false)
                 val recyclerView = view.findViewById<RecyclerView>(R.id.growthStagesRecycler)
                 
-                val stages = crop?.growthStages ?: emptyList()
+                // Convert GrowthStageEntity to GrowthStage (UI model)
+                val displayStages = stages.map { 
+                    com.example.botadex.GrowthStage(it.stage, it.description, it.durationDays) 
+                }
                 recyclerView.layoutManager = LinearLayoutManager(this)
-                recyclerView.adapter = GrowthStagesAdapter(stages)
+                recyclerView.adapter = GrowthStagesAdapter(displayStages)
                 tabContentContainer.addView(view)
             }
-        }
-    }
-
-    private fun loadCropData(): Map<String, CropInfo> {
-        return try {
-            val jsonString = assets.open("crop_library.json").bufferedReader().use { it.readText() }
-            val type = object : TypeToken<Map<String, CropInfo>>() {}.type
-            Gson().fromJson(jsonString, type)
-        } catch (e: Exception) {
-            emptyMap()
         }
     }
 }

@@ -6,43 +6,382 @@
     android:layout_height="match_parent"
     android:background="@color/background_light">
 
-    <ImageButton
-        android:id="@+id/backButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="28dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/abc_ic_ab_back_material"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="#1D1B20" />
+    <!-- Sticky Header Bar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/stickyHeader"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/background_light"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/collectionTitleText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/instrument_sans"
-        android:text="Collection"
-        android:textColor="@color/text_green_dark"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/backButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/backButton" />
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="24dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/abc_ic_ab_back_material"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.6"
+            app:tint="#1D1B20"
+            android:contentDescription="@string/back" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/entriesRecyclerView"
+        <TextView
+            android:id="@+id/collectionTitleHeader"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="68dp"
+            android:fontFamily="@font/instrument_sans"
+            android:gravity="center"
+            android:text="@string/collection_details"
+            android:textColor="@color/text_green_dark"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/backButton"
+            app:layout_constraintStart_toEndOf="@id/backButton"
+            app:layout_constraintTop_toTopOf="@id/backButton"
+            app:layout_constraintVertical_bias="1.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Scrollable Content -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:paddingBottom="16dp"
-        android:clipToPadding="false"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/collectionTitleText"
-        tools:listitem="@layout/item_recent_journal_entry" />
+        app:layout_constraintTop_toBottomOf="@id/stickyHeader">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/innerConstraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="100dp">
+
+            <!-- Main Cover Photo (wavysquare style) -->
+            <FrameLayout
+                android:id="@+id/wavySquareFrame"
+                android:layout_width="match_parent"
+                android:layout_height="265dp"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/collectionFullImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="16dp"
+                    android:scaleType="centerCrop"
+                    android:src="@color/placeholder_gray"
+                    app:shapeAppearanceOverlay="@style/wavysquare"
+                    android:contentDescription="@null" />
+            </FrameLayout>
+
+            <!-- Featured Thumbnail Overlay (Synced with JournalActivity List) -->
+            <FrameLayout
+                android:id="@+id/collectionThumbnailCard"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_marginStart="43dp"
+                app:layout_constraintBottom_toBottomOf="@id/wavySquareFrame"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/wavySquareFrame">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp">
+
+                    <ImageView
+                        android:id="@+id/collectionThumbnailImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@color/placeholder_gray"
+                        android:contentDescription="@null" />
+                </androidx.cardview.widget.CardView>
+            </FrameLayout>
+
+            <!-- Names Section -->
+            <TextView
+                android:id="@+id/headerCropName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="@font/eb_garamond"
+                android:textColor="@color/text_green_dark"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@id/collectionThumbnailCard"
+                app:layout_constraintTop_toBottomOf="@id/collectionThumbnailCard"
+                tools:text="Cassava" />
+
+            <TextView
+                android:id="@+id/headerPlantName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/instrument_sans"
+                android:textColor="#B3000000"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@id/headerCropName"
+                app:layout_constraintTop_toBottomOf="@id/headerCropName"
+                tools:text="My Home Garden" />
+
+            <!-- Collection Description Text -->
+            <TextView
+                android:id="@+id/collectionDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="43dp"
+                android:fontFamily="@font/instrument_sans"
+                android:textColor="#000000"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/headerPlantName"
+                app:layout_constraintTop_toBottomOf="@id/headerPlantName"
+                tools:text="Planting progress and health overview." />
+
+            <!-- Tab Buttons -->
+            <TextView
+                android:id="@+id/tabJournal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/instrument_sans"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:text="@string/tab_journal"
+                android:textColor="@color/brand_green"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@+id/tabEdit"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/collectionDescription"
+                android:layout_marginStart="32dp"/>
+
+            <TextView
+                android:id="@+id/tabEdit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/instrument_sans"
+                android:gravity="center"
+                android:paddingVertical="10dp"
+                android:text="@string/tab_edit"
+                android:textColor="@color/nav_inactive"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_weight="1"
+                app:layout_constraintStart_toEndOf="@id/tabJournal"
+                app:layout_constraintTop_toTopOf="@id/tabJournal"
+                android:layout_marginEnd="32dp"/>
+
+            <View
+                android:id="@+id/tabIndicator"
+                android:layout_width="0dp"
+                android:layout_height="2dp"
+                android:background="@color/brand_green"
+                app:layout_constraintBottom_toBottomOf="@id/tabJournal"
+                app:layout_constraintEnd_toEndOf="@id/tabJournal"
+                app:layout_constraintStart_toStartOf="@id/tabJournal" />
+
+            <View
+                android:id="@+id/tabDivider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#1A000000"
+                app:layout_constraintTop_toBottomOf="@id/tabJournal" />
+
+            <!-- Content Area -->
+            <FrameLayout
+                android:id="@+id/tabContentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/tabDivider">
+
+                <!-- Journal Tab Container -->
+                <LinearLayout
+                    android:id="@+id/journalContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/harvestBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="43dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/bg_chip_harvested"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="2dp"
+                        android:text="@string/harvested_uppercase"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/tvRecentEntriesLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="43dp"
+                        android:layout_marginTop="24dp"
+                        android:fontFamily="@font/instrument_sans"
+                        android:text="@string/journal_entries"
+                        android:textColor="@color/text_green_dark"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/entriesRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@layout/item_recent_journal_entry" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnHarvest"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:layout_marginHorizontal="32dp"
+                        android:layout_marginTop="24dp"
+                        android:backgroundTint="#FF9800"
+                        android:fontFamily="@font/instrument_sans"
+                        android:text="@string/harvest"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"
+                        app:cornerRadius="12dp" />
+                </LinearLayout>
+
+                <!-- Edit Tab Container -->
+                <LinearLayout
+                    android:id="@+id/editContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="32dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/collection_description_label"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_green_dark"
+                        android:fontFamily="@font/instrument_sans"/>
+
+                    <EditText
+                        android:id="@+id/collectionDescriptionEdit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/rounded_border_thin"
+                        android:hint="@string/description_hint"
+                        android:inputType="textMultiLine"
+                        android:minLines="3"
+                        android:gravity="top"
+                        android:padding="12dp"
+                        android:textSize="14sp"
+                        android:importantForAutofill="no" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/update_photos"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_green_dark"
+                        android:fontFamily="@font/instrument_sans"/>
+
+                    <!-- Wavysquare Preview & Button -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/editPreviewCover"
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            android:scaleType="centerCrop"
+                            android:src="@color/placeholder_gray"
+                            app:shapeAppearanceOverlay="@style/wavysquare"
+                            android:contentDescription="@null" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEditCover"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:text="@string/edit_wavysquare"
+                            app:strokeColor="@color/brand_green" />
+                    </LinearLayout>
+
+                    <!-- Feature Pic Preview & Button (Chosen from Journal) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center_vertical">
+
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="60dp"
+                            android:layout_height="60dp"
+                            app:cardCornerRadius="8dp"
+                            app:cardElevation="0dp">
+
+                            <ImageView
+                                android:id="@+id/editPreviewThumbnail"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@color/placeholder_gray"
+                                android:contentDescription="@null" />
+                        </androidx.cardview.widget.CardView>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnEditThumbnail"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:text="@string/select_from_journal"
+                            app:strokeColor="@color/brand_green" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDeleteCollection"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="40dp"
+                        android:text="@string/delete_collection"
+                        android:textColor="#F44336" />
+
+                </LinearLayout>
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- FAB for adding new entries -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addEntryButton"
         android:layout_width="wrap_content"
@@ -53,6 +392,7 @@
         app:backgroundTint="#458C60"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="#FFFFFF" />
+        app:tint="#FFFFFF"
+        android:contentDescription="@null" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

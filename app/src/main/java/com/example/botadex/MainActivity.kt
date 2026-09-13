@@ -26,12 +26,14 @@ import com.example.botadex.database.BotadexDatabase
 import com.example.botadex.database.Crop
 import com.example.botadex.database.JournalCollection
 import com.example.botadex.ml.TFLiteClassifier
+import com.example.botadex.ml.HealthClassifier
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlinx.coroutines.launch
@@ -47,17 +49,25 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cropNameText: TextView
     private lateinit var scientificNameText: TextView
     private lateinit var confidenceText: TextView
+    private lateinit var healthStatusText: TextView
+    private lateinit var diseaseNameText: TextView
     private lateinit var descriptionText: TextView
+    
+    private lateinit var diseaseInfoLayout: View
+    private lateinit var diseaseDescriptionText: TextView
+    private lateinit var diseaseTreatmentText: TextView
     
     private lateinit var addToJournalButton: Button
     private lateinit var tryAgainButton: Button
     
     private var currentImagePath: String? = null
     private var currentCropName: String? = null
+    private var currentHealthStatus: String = "Healthy"
     private var targetCollectionId: Int = -1
 
     private lateinit var db: BotadexDatabase
     private lateinit var classifier: TFLiteClassifier
+    private lateinit var healthClassifier: HealthClassifier
     private lateinit var dataset: List<CropInfo>
 
     private var imageCapture: ImageCapture? = null
@@ -93,10 +103,6 @@ class MainActivity : AppCompatActivity() {
 
         targetCollectionId = intent.getIntExtra("TARGET_COLLECTION_ID", -1)
 
-        // Initialize layouts
-        identifyLayout = findViewById(R.id.identifyLayout)
-        resultLayout = findViewById(R.id.resultLayout)
-        
         // Initialize views
         viewFinder = findViewById(R.id.viewFinder)
         imageViewInitial = findViewById(R.id.imageViewInitial)
@@ -104,7 +110,16 @@ class MainActivity : AppCompatActivity() {
         cropNameText = findViewById(R.id.cropNameText)
         scientificNameText = findViewById(R.id.scientificNameText)
         confidenceText = findViewById(R.id.confidenceText)
+        healthStatusText = findViewById(R.id.healthStatusText)
+        diseaseNameText = findViewById(R.id.diseaseNameText)
         descriptionText = findViewById(R.id.descriptionText)
+        
+        diseaseInfoLayout = findViewById(R.id.diseaseInfoLayout)
+        diseaseDescriptionText = findViewById(R.id.diseaseDescriptionText)
+        diseaseTreatmentText = findViewById(R.id.diseaseTreatmentText)
+        
+        identifyLayout = findViewById(R.id.identifyLayout)
+        resultLayout = findViewById(R.id.resultLayout)
         
         val captureButton: View = findViewById(R.id.captureButton)
         val importButton: View = findViewById(R.id.importButton)
@@ -133,6 +148,7 @@ class MainActivity : AppCompatActivity() {
 
         db = BotadexDatabase.getDatabase(this)
         classifier = TFLiteClassifier(this)
+        healthClassifier = HealthClassifier(this)
         dataset = loadDataset()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -148,6 +164,14 @@ class MainActivity : AppCompatActivity() {
         tryAgainButton.setOnClickListener {
             showIdentifyLayout()
             startCamera()
+        }
+
+        // FAB at the bottom center
+        findViewById<View>(R.id.navIdentify).setOnClickListener {
+            if (resultLayout.visibility == View.VISIBLE) {
+                showIdentifyLayout()
+                startCamera()
+            }
         }
 
         addToJournalButton.setOnClickListener {
@@ -171,10 +195,10 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val collections = db.cropDao().getAllCollectionsOnce()
             if (collections.isEmpty()) {
-                // Requirement: Redirect directly onto the add collection dialog
                 val intent = Intent(this@MainActivity, JournalActivity::class.java)
                 intent.putExtra("PREFILL_CROP_NAME", currentCropName)
                 intent.putExtra("PREFILL_IMAGE_PATH", currentImagePath)
+                intent.putExtra("DETECTED_HEALTH", currentHealthStatus)
                 startActivity(intent)
             } else {
                 val options = arrayOf("Start New Collection", "Add to Existing Collection")
@@ -185,6 +209,7 @@ class MainActivity : AppCompatActivity() {
                             val intent = Intent(this@MainActivity, JournalActivity::class.java)
                             intent.putExtra("PREFILL_CROP_NAME", currentCropName)
                             intent.putExtra("PREFILL_IMAGE_PATH", currentImagePath)
+                            intent.putExtra("DETECTED_HEALTH", currentHealthStatus)
                             startActivity(intent)
                         } else {
                             showCollectionSelectionDialog(collections)
@@ -334,17 +359,25 @@ class MainActivity : AppCompatActivity() {
         imageViewResult.setImageBitmap(bitmap)
         currentImagePath = saveBitmapToFile(bitmap)
 
+        // Identify Crop
         val (index, confidence) = classifier.classify(bitmap)
         val crop = dataset.getOrNull(index)
 
         if (crop != null) {
             currentCropName = crop.name
+            
+            // CRITICAL: Pass the detected crop name to filter the health classifier results
+            val healthResult = healthClassifier.classify(bitmap, currentCropName ?: "")
+            currentHealthStatus = healthResult.condition
+
             val confidencePercent = (confidence * 100).toInt()
             
-            cropNameText.text = currentCropName?.replaceFirstChar { it.uppercase() }
-            scientificNameText.text = crop.scientificName ?: "Scientific name"
+            cropNameText.text = "${currentCropName?.replaceFirstChar { it.uppercase() }}"
+            scientificNameText.text = crop.scientificName ?: "Scientific Name"
             confidenceText.text = "$confidencePercent%"
             descriptionText.text = crop.description
+            
+            updateHealthUI(healthResult)
             
             showResultLayout()
 
@@ -357,6 +390,45 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             Toast.makeText(this, "Unknown crop", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun updateHealthUI(result: HealthClassifier.Result) {
+        val health = result.condition
+        val healthLower = health.lowercase(Locale.getDefault())
+        
+        // Show/Hide disease info
+        if (result.isHealthy) {
+            diseaseInfoLayout.visibility = View.GONE
+        } else {
+            diseaseInfoLayout.visibility = View.VISIBLE
+            diseaseDescriptionText.text = result.diseaseDescription
+            diseaseTreatmentText.text = result.whatToDo
+        }
+        
+        when {
+            healthLower == "healthy" -> {
+                healthStatusText.text = "Healthy"
+                healthStatusText.setBackgroundResource(R.drawable.bg_chip_growing)
+                healthStatusText.setTextColor(ContextCompat.getColor(this, R.color.status_healthy_text))
+                diseaseNameText.visibility = View.GONE
+            }
+            healthLower == "attention" -> {
+                healthStatusText.text = "Attention"
+                healthStatusText.setBackgroundResource(R.drawable.bg_chip_attention)
+                healthStatusText.setTextColor(ContextCompat.getColor(this, R.color.status_attention_text))
+                diseaseNameText.text = "potential issue detected"
+                diseaseNameText.visibility = View.VISIBLE
+            }
+            else -> {
+                healthStatusText.text = "Warning"
+                healthStatusText.setBackgroundResource(R.drawable.bg_chip_warning)
+                healthStatusText.setTextColor(ContextCompat.getColor(this, R.color.status_warning_text))
+                
+                // Show the specific disease name returned by the HealthClassifier
+                diseaseNameText.text = health.lowercase(Locale.getDefault())
+                diseaseNameText.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -376,6 +448,7 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("CROP_NAME", currentCropName)
         intent.putExtra("IMAGE_PATH", currentImagePath)
         intent.putExtra("COLLECTION_ID", collectionId)
+        intent.putExtra("DETECTED_HEALTH", currentHealthStatus)
         startActivity(intent)
     }
 
@@ -441,5 +514,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        healthClassifier.close()
     }
 }

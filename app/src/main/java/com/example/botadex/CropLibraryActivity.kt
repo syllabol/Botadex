@@ -11,30 +11,28 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.example.botadex.database.BotadexDatabase
+import com.example.botadex.database.Crop
+import kotlinx.coroutines.launch
 
 class CropLibraryActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: CropAdapter
-    private var allCrops: List<CropInfo> = emptyList()
+    private var allCrops: List<Crop> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_crop_library)
 
         recyclerView = findViewById(R.id.cropRecyclerView)
-        // Programmatic LayoutManager removed to allow XML GridLayoutManager (2 columns) to work
 
         val searchEditText = findViewById<EditText>(R.id.searchEditText)
         val availableText = findViewById<TextView>(R.id.availableOfflineText)
 
-        allCrops = loadCropData()
-        availableText.text = "${allCrops.size} crops available offline"
-
-        adapter = CropAdapter(allCrops) { crop ->
+        adapter = CropAdapter(emptyList()) { crop ->
             val intent = Intent(this, CropDetailActivity::class.java)
             intent.putExtra("CROP_NAME", crop.name)
             startActivity(intent)
@@ -72,36 +70,35 @@ class CropLibraryActivity : AppCompatActivity() {
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        loadCrops()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadCrops()
+    }
+
+    private fun loadCrops() {
+        lifecycleScope.launch {
+            val db = BotadexDatabase.getDatabase(this@CropLibraryActivity)
+            allCrops = db.cropDao().getAllCrops()
+            findViewById<TextView>(R.id.availableOfflineText).text = "${allCrops.size} crops available offline"
+            adapter.updateList(allCrops)
+        }
     }
 
     private fun filter(text: String) {
         val filteredList = allCrops.filter {
-            it.name?.contains(text, ignoreCase = true) == true || 
+            it.name.contains(text, ignoreCase = true) || 
             it.scientificName?.contains(text, ignoreCase = true) == true
         }
         adapter.updateList(filteredList)
     }
 
-    private fun loadCropData(): List<CropInfo> {
-        return try {
-            val jsonString = assets.open("crop_library.json")
-                .bufferedReader()
-                .use { it.readText() }
-
-            val type = object : TypeToken<Map<String, CropInfo>>() {}.type
-            val map: Map<String, CropInfo> = Gson().fromJson(jsonString, type)
-            
-            map.map { (key, value) -> 
-                value.copy(name = key.replaceFirstChar { it.uppercase() })
-            }
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
-
     class CropAdapter(
-        private var crops: List<CropInfo>,
-        private val onItemClick: (CropInfo) -> Unit
+        private var crops: List<Crop>,
+        private val onItemClick: (Crop) -> Unit
     ) : RecyclerView.Adapter<CropAdapter.CropViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CropViewHolder {
@@ -116,34 +113,46 @@ class CropLibraryActivity : AppCompatActivity() {
 
         override fun getItemCount() = crops.size
 
-        fun updateList(newList: List<CropInfo>) {
+        fun updateList(newList: List<Crop>) {
             crops = newList
             notifyDataSetChanged()
         }
 
         class CropViewHolder(
             itemView: View,
-            private val onItemClick: (CropInfo) -> Unit
+            private val onItemClick: (Crop) -> Unit
         ) : RecyclerView.ViewHolder(itemView) {
             private val nameText = itemView.findViewById<TextView>(R.id.cropNameText)
             private val descriptionText = itemView.findViewById<TextView>(R.id.descriptionPreviewText)
             private val cropImageView = itemView.findViewById<ImageView>(R.id.cropImageView)
 
-            fun bind(crop: CropInfo) {
-                nameText.text = crop.name
+            fun bind(crop: Crop) {
+                nameText.text = crop.name.replaceFirstChar { it.uppercase() }
                 descriptionText.text = crop.description
                 
-                // Map crop name to its specific image
-                val imageResId = when (crop.name?.lowercase()) {
-                    "cassava" -> R.drawable.cassava
-                    "tomato" -> R.drawable.tomato
-                    "potato" -> R.drawable.potato
-                    "ube" -> R.drawable.ube
-                    "kamote" -> R.drawable.kamote
-                    "onion" -> R.drawable.onion
-                    else -> R.drawable.ic_launcher_foreground
+                // Dynamic Image Loading
+                val context = itemView.context
+                val imageResId = if (!crop.imageUri.isNullOrBlank()) {
+                    context.resources.getIdentifier(crop.imageUri, "drawable", context.packageName)
+                } else {
+                    0
                 }
-                cropImageView.setImageResource(imageResId)
+
+                if (imageResId != 0) {
+                    cropImageView.setImageResource(imageResId)
+                } else {
+                    // Fallback to name-based or default
+                    val fallbackId = when (crop.name.lowercase()) {
+                        "cassava" -> R.drawable.cassava
+                        "tomato" -> R.drawable.tomato
+                        "potato" -> R.drawable.potato
+                        "ube" -> R.drawable.ube
+                        "kamote" -> R.drawable.kamote
+                        "onion" -> R.drawable.onion
+                        else -> R.drawable.ic_launcher_foreground
+                    }
+                    cropImageView.setImageResource(fallbackId)
+                }
 
                 itemView.setOnClickListener { onItemClick(crop) }
             }

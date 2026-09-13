@@ -6,15 +6,21 @@
     android:layout_height="wrap_content"
     android:paddingVertical="8dp">
 
-    <!-- Icon Box (Rectangle 101/102 style) -->
-    <View
+    <!-- Picture Slot for Stage -->
+
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/stageIconBox"
         android:layout_width="40dp"
         android:layout_height="45dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="-5dp"
         android:background="#267BAF6F"
+        android:padding="4dp"
+        android:scaleType="centerInside"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/rounded_rect"
+        tools:src="@drawable/bg_stage_icon" />
 
     <TextView
         android:id="@+id/stageNumber"
@@ -36,6 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/eb_garamond"
         android:textColor="#1F4D2E"
         android:textSize="12sp"
@@ -78,9 +85,10 @@
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_marginTop="8dp"
-        android:background="#0D000000"
+        android:background="#1A000000"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/stageIconBox"
+        app:layout_constraintStart_toStartOf="@id/stageTitle"
         app:layout_constraintTop_toBottomOf="@id/stageDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

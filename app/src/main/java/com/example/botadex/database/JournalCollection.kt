@@ -14,6 +14,8 @@ data class JournalCollection(
     val healthStatus: String = "Healthy", // Healthy, Attention, Warning
     val currentDay: Int = 1,
     val targetDays: Int = 30,
-    val imagePath: String? = null,
-    val lastInteractionDate: Long = System.currentTimeMillis()
+    val imagePath: String? = null, // Featured/Thumbnail image (shown in JournalActivity list)
+    val thumbnailPath: String? = null, // Custom Cover/Wavysquare image
+    val lastInteractionDate: Long = System.currentTimeMillis(),
+    val description: String? = null // Short summary or notes
 )

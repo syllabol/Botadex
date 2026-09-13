@@ -17,11 +17,11 @@ class TFLiteClassifier(context: Context) {
     init {
         val model = loadModelFile(context)
         interpreter = Interpreter(model)
-        
+
         // Dynamically get input size and output classes from the model
         val inputShape = interpreter.getInputTensor(0).shape() // e.g., [1, 224, 224, 3]
         inputSize = inputShape[1]
-        
+
         val outputShape = interpreter.getOutputTensor(0).shape() // e.g., [1, 3]
         numClasses = outputShape[1]
     }
@@ -42,7 +42,7 @@ class TFLiteClassifier(context: Context) {
     }
 
     /**
-     * Classifies the given bitmap and returns the index of the predicted class 
+     * Classifies the given bitmap and returns the index of the predicted class
      * and the confidence score (probability).
      */
     fun classify(bitmap: Bitmap): Pair<Int, Float> {

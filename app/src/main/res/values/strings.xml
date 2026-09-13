@@ -69,4 +69,19 @@
     <string name="warning_status">Warning</string>
     <string name="entry_title_format">%1$s - Day %2$d</string>
     <string name="collection_created">Collection created!</string>
+
+    <!-- Editing Collection & Header -->
+    <string name="collection_details">Collection Details</string>
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="tab_journal">Journal</string>
+    <string name="tab_edit">Edit</string>
+    <string name="harvest">Harvest</string>
+    <string name="harvested_uppercase">HARVESTED</string>
+    <string name="edit_wavysquare">Change Wavysquare</string>
+    <string name="select_from_journal">Select from Journal</string>
+    <string name="collection_description_label">Collection Description</string>
+    <string name="description_hint">Add summary or planting notes&#8230;</string>
+    <string name="update_photos">Update Photos</string>
+    <string name="delete_collection">Delete Collection</string>
 </resources>

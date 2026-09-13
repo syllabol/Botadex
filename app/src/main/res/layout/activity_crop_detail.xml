@@ -15,7 +15,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="30dp"
         android:contentDescription="Back"
-        android:src="@drawable/arrow"
+        android:src="@drawable/abc_ic_ab_back_material"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="#1D1B20" />
@@ -39,6 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavBg2"
         app:layout_constraintTop_toBottomOf="@id/tvCropDetailTitle">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -56,17 +57,28 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/cropFullImage"
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/cropImagePager"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_margin="16dp"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_launcher_background"
-                    app:shapeAppearanceOverlay="@style/wavysquare" />
+                    android:layout_margin="16dp" />
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/cropImageIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="24dp"
+                    android:background="@android:color/transparent"
+                    app:tabBackground="@drawable/dot_selector"
+                    app:tabGravity="center"
+                    app:tabIndicatorHeight="0dp"
+                    app:tabMaxWidth="12dp"
+                    app:tabPaddingEnd="4dp"
+                    app:tabPaddingStart="4dp" />
             </FrameLayout>
 
-            <!-- Crop Thumbnail Overlay (Converted to FrameLayout to remove border) -->
+            <!-- Crop Thumbnail Overlay -->
             <FrameLayout
                 android:id="@+id/cropThumbnailCard"
                 android:layout_width="70dp"
@@ -139,7 +151,7 @@
                 app:layout_constraintStart_toStartOf="@id/descriptionText"
                 app:layout_constraintTop_toBottomOf="@id/descriptionText" />
 
-            <!-- Tab Buttons (Direct Siblings) -->
+            <!-- Tab Buttons -->
             <TextView
                 android:id="@+id/tabCareGuide"
                 android:layout_width="0dp"
@@ -239,6 +251,8 @@
                 android:id="@+id/tabContentContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="120dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/lineDivider" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -371,7 +385,5 @@
             android:padding="18dp"
             android:src="@drawable/cam" />
     </androidx.cardview.widget.CardView>
-
-    <!-- Bottom Navigation -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

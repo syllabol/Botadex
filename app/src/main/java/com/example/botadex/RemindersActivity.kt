@@ -1,16 +1,22 @@
 package com.example.botadex
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.TimePickerDialog
-import android.content.ContentUris
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
-import android.provider.CalendarContract
+import android.provider.Settings
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -30,9 +36,7 @@ import com.example.botadex.database.BotadexDatabase
 import com.example.botadex.database.Reminder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -62,6 +66,7 @@ class RemindersActivity : AppCompatActivity() {
         setContentView(R.layout.activity_reminders)
 
         db = BotadexDatabase.getDatabase(this)
+        createNotificationChannel()
 
         monthText = findViewById(R.id.monthText)
         calendarGrid = findViewById(R.id.calendarGrid)
@@ -78,25 +83,11 @@ class RemindersActivity : AppCompatActivity() {
         upcomingRecyclerView.layoutManager = LinearLayoutManager(this)
 
         updateMonthYearDisplay()
-        
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_CALENDAR), 100)
-        } else {
-            fetchDaysWithReminders()
-        }
+        checkPermissions()
 
         findViewById<View>(R.id.backButton).setOnClickListener { finish() }
 
-        findViewById<View>(R.id.calendarTitle).setOnLongClickListener {
-            calendar.time = Date()
-            selectedDate.time = Date()
-            updateMonthYearDisplay()
-            fetchDaysWithReminders()
-            loadRemindersForSelectedDay()
-            nestedScrollView.smoothScrollTo(0, 0)
-            true
-        }
-
+        // Setup Month Navigation
         findViewById<View>(R.id.prevMonth).setOnClickListener {
             calendar.add(Calendar.MONTH, -1)
             updateMonthYearDisplay()
@@ -118,8 +109,95 @@ class RemindersActivity : AppCompatActivity() {
         findViewById<View>(R.id.navJournal).setOnClickListener { startActivity(Intent(this, JournalActivity::class.java)) }
         findViewById<View>(R.id.navCalendar).setOnClickListener { nestedScrollView.smoothScrollTo(0, 0) }
 
+        fetchDaysWithReminders()
         loadRemindersForSelectedDay()
         loadUpcomingReminders()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = ReminderReceiver.CHANNEL_ID
+            val name = ReminderReceiver.CHANNEL_NAME
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(channelId, name, importance).apply {
+                description = "Plant care notifications"
+                enableLights(true)
+                lightColor = Color.GREEN
+                enableVibration(true)
+                setShowBadge(true)
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun checkPermissions() {
+        val permissions = mutableListOf<String>()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        
+        if (permissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 100)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                try {
+                    val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e("Botadex", "Error opening exact alarm settings", e)
+                }
+            }
+        }
+    }
+
+    private fun scheduleReminderNotification(reminder: Reminder) {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        
+        val intent = Intent(this, ReminderReceiver::class.java).apply {
+            action = "com.example.botadex.ACTION_REMIND_${reminder.id}"
+            putExtra(ReminderReceiver.EXTRA_PLANT_NAME, reminder.plantName)
+            putExtra(ReminderReceiver.EXTRA_TASK_TYPE, reminder.taskType)
+            putExtra(ReminderReceiver.EXTRA_REMINDER_ID, reminder.id)
+            data = android.net.Uri.parse("botadex://reminder/${reminder.id}")
+        }
+        
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            reminder.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminder.timestamp, pendingIntent)
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, reminder.timestamp, pendingIntent)
+            }
+        } catch (e: SecurityException) {
+            Log.e("Botadex", "Permission denied for exact alarm", e)
+        }
+    }
+
+    private fun cancelReminderNotification(reminder: Reminder) {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, ReminderReceiver::class.java).apply {
+            action = "com.example.botadex.ACTION_REMIND_${reminder.id}"
+            data = android.net.Uri.parse("botadex://reminder/${reminder.id}")
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            reminder.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -152,84 +230,8 @@ class RemindersActivity : AppCompatActivity() {
                 cal.timeInMillis = it.timestamp
                 daysWithReminders.add(cal.get(Calendar.YEAR) * 1000 + cal.get(Calendar.DAY_OF_YEAR))
             }
-
-            if (ContextCompat.checkSelfPermission(this@RemindersActivity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-                val phoneCalendarDays = withContext(Dispatchers.IO) {
-                    getPhoneCalendarEventDays(startCal.timeInMillis, endCal.timeInMillis)
-                }
-                daysWithReminders.addAll(phoneCalendarDays)
-            }
-
             populateCalendar()
         }
-    }
-
-    private fun getPhoneCalendarEventDays(startMillis: Long, endMillis: Long): List<Int> {
-        val eventDays = mutableListOf<Int>()
-        val projection = arrayOf(CalendarContract.Instances.BEGIN)
-        val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
-        ContentUris.appendId(builder, startMillis)
-        ContentUris.appendId(builder, endMillis)
-
-        val cursor = contentResolver.query(builder.build(), projection, null, null, null)
-        cursor?.use {
-            val cal = Calendar.getInstance()
-            while (it.moveToNext()) {
-                val begin = it.getLong(0)
-                cal.timeInMillis = begin
-                eventDays.add(cal.get(Calendar.YEAR) * 1000 + cal.get(Calendar.DAY_OF_YEAR))
-            }
-        }
-        return eventDays
-    }
-
-    private fun getPhoneEventsForDay(dateMillis: Long): List<Reminder> {
-        val reminders = mutableListOf<Reminder>()
-        val projection = arrayOf(CalendarContract.Instances.TITLE, CalendarContract.Instances.BEGIN)
-        
-        val startOfDay = Calendar.getInstance().apply {
-            timeInMillis = dateMillis
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-        
-        val endOfDay = Calendar.getInstance().apply {
-            timeInMillis = dateMillis
-            set(Calendar.HOUR_OF_DAY, 23)
-            set(Calendar.MINUTE, 59)
-            set(Calendar.SECOND, 59)
-            set(Calendar.MILLISECOND, 999)
-        }.timeInMillis
-
-        val builder = CalendarContract.Instances.CONTENT_URI.buildUpon()
-        ContentUris.appendId(builder, startOfDay)
-        ContentUris.appendId(builder, endOfDay)
-
-        val cursor = contentResolver.query(builder.build(), projection, null, null, null)
-        cursor?.use {
-            val titleIdx = it.getColumnIndex(CalendarContract.Instances.TITLE)
-            val beginIdx = it.getColumnIndex(CalendarContract.Instances.BEGIN)
-            val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
-            val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault())
-            
-            while (it.moveToNext()) {
-                val title = it.getString(titleIdx) ?: "Event"
-                val begin = it.getLong(beginIdx)
-                val cal = Calendar.getInstance().apply { timeInMillis = begin }
-                
-                reminders.add(Reminder(
-                    cropName = title,
-                    taskType = "Calendar Event",
-                    date = dateFormat.format(cal.time),
-                    time = timeFormat.format(cal.time),
-                    timestamp = begin,
-                    isCompleted = false
-                ))
-            }
-        }
-        return reminders
     }
 
     private fun populateCalendar() {
@@ -343,11 +345,7 @@ class RemindersActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val appReminders = db.cropDao().getRemindersForDay(dateString)
-            val phoneReminders = if (ContextCompat.checkSelfPermission(this@RemindersActivity, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED) {
-                withContext(Dispatchers.IO) { getPhoneEventsForDay(selectedDate.timeInMillis) }
-            } else emptyList()
-            
-            val allReminders = (appReminders + phoneReminders).sortedBy { it.timestamp }
+            val allReminders = appReminders.sortedBy { it.timestamp }
 
             if (allReminders.isNotEmpty()) {
                 noTodayRemindersText.visibility = View.GONE
@@ -377,21 +375,25 @@ class RemindersActivity : AppCompatActivity() {
     }
 
     private fun toggleReminder(reminder: Reminder, isChecked: Boolean) {
-        if (reminder.taskType == "Calendar Event") return
         lifecycleScope.launch {
             db.cropDao().insertReminder(reminder.copy(isCompleted = isChecked))
+            if (isChecked) {
+                cancelReminderNotification(reminder)
+            } else if (reminder.timestamp > System.currentTimeMillis()) {
+                scheduleReminderNotification(reminder)
+            }
             loadRemindersForSelectedDay()
             loadUpcomingReminders()
         }
     }
 
     private fun deleteReminder(reminder: Reminder) {
-        if (reminder.taskType == "Calendar Event") return
         AlertDialog.Builder(this)
             .setTitle(R.string.delete_reminder_title)
-            .setMessage(getString(R.string.delete_reminder_msg, reminder.cropName))
+            .setMessage(getString(R.string.delete_reminder_msg, reminder.plantName))
             .setPositiveButton("Delete") { _, _ ->
                 lifecycleScope.launch {
+                    cancelReminderNotification(reminder)
                     db.cropDao().deleteReminder(reminder)
                     fetchDaysWithReminders()
                     loadRemindersForSelectedDay()
@@ -402,7 +404,7 @@ class RemindersActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun loadCropNames(): List<String> {
+    private fun loadCropLibraryNames(): List<String> {
         return try {
             val jsonString = assets.open("crop_library.json").bufferedReader().use { it.readText() }
             val map: Map<String, CropInfo> = Gson().fromJson(jsonString, object : TypeToken<Map<String, CropInfo>>() {}.type)
@@ -427,7 +429,20 @@ class RemindersActivity : AppCompatActivity() {
         editDate.setText(dateFormat.format(tempCalendar.time))
         editTime.setText(timeFormat.format(tempCalendar.time))
 
-        spinnerCropName.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, loadCropNames())
+        // Updated: Use actual collection titles from your journal
+        lifecycleScope.launch {
+            val collections = db.cropDao().getAllCollectionsOnce()
+            val titles = if (collections.isNotEmpty()) {
+                collections.map { it.title }.sorted()
+            } else {
+                loadCropLibraryNames()
+            }
+            
+            runOnUiThread {
+                spinnerCropName.adapter = ArrayAdapter(this@RemindersActivity, android.R.layout.simple_spinner_dropdown_item, titles)
+            }
+        }
+
         spinnerTask.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, arrayOf("Watering", "Fertilizing", "Pest Control", "Harvesting"))
 
         editDate.setOnClickListener {
@@ -440,21 +455,31 @@ class RemindersActivity : AppCompatActivity() {
             TimePickerDialog(this, { _, h, min ->
                 tempCalendar.set(Calendar.HOUR_OF_DAY, h)
                 tempCalendar.set(Calendar.MINUTE, min)
+                tempCalendar.set(Calendar.SECOND, 0)
+                tempCalendar.set(Calendar.MILLISECOND, 0)
                 editTime.setText(timeFormat.format(tempCalendar.time))
             }, tempCalendar.get(Calendar.HOUR_OF_DAY), tempCalendar.get(Calendar.MINUTE), false).show()
         }
 
         val alertDialog = AlertDialog.Builder(this).setView(dialogView).create()
         btnSave.setOnClickListener {
+            if (tempCalendar.timeInMillis <= System.currentTimeMillis()) {
+                Toast.makeText(this, "Please select a future time", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val reminder = Reminder(
-                cropName = spinnerCropName.selectedItem.toString(),
+                plantName = spinnerCropName.selectedItem.toString(),
                 taskType = spinnerTask.selectedItem.toString(),
                 date = editDate.text.toString(),
                 time = editTime.text.toString(),
                 timestamp = tempCalendar.timeInMillis
             )
             lifecycleScope.launch {
-                db.cropDao().insertReminder(reminder)
+                val id = db.cropDao().insertReminder(reminder)
+                val insertedReminder = reminder.copy(id = id.toInt())
+                scheduleReminderNotification(insertedReminder)
+                
                 fetchDaysWithReminders()
                 loadRemindersForSelectedDay()
                 loadUpcomingReminders()
@@ -479,13 +504,9 @@ class RemindersActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ReminderViewHolder, position: Int) {
             val reminder = reminders[position]
             holder.bind(reminder, showDate, onToggle)
-            if (reminder.taskType != "Calendar Event") {
-                holder.itemView.setOnLongClickListener {
-                    onDelete(reminder)
-                    true
-                }
-            } else {
-                holder.itemView.setOnLongClickListener(null)
+            holder.itemView.setOnLongClickListener {
+                onDelete(reminder)
+                true
             }
         }
 
@@ -499,35 +520,29 @@ class RemindersActivity : AppCompatActivity() {
             private val checkbox = itemView.findViewById<CheckBox>(R.id.reminderCheckbox)
 
             fun bind(reminder: Reminder, showDate: Boolean, onToggle: (Reminder, Boolean) -> Unit) {
-                name.text = reminder.cropName
+                // Updated: use plantName from journal
+                name.text = reminder.plantName
                 task.text = reminder.taskType
                 dateTime.text = if (showDate) "${reminder.date}\n${reminder.time}" else reminder.time
                 
                 checkbox.setOnCheckedChangeListener(null)
                 checkbox.isChecked = reminder.isCompleted
                 
-                if (reminder.taskType == "Calendar Event") {
-                    checkbox.visibility = View.GONE
+                checkbox.visibility = View.VISIBLE
+                if (reminder.isCompleted) {
+                    name.paintFlags = name.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                    name.setTextColor(Color.GRAY)
+                    task.setTextColor(Color.GRAY)
+                } else {
                     name.paintFlags = name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
                     name.setTextColor(Color.parseColor("#1F4D2E"))
                     task.setTextColor(Color.BLACK)
-                } else {
-                    checkbox.visibility = View.VISIBLE
-                    if (reminder.isCompleted) {
-                        name.paintFlags = name.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                        name.setTextColor(Color.GRAY)
-                        task.setTextColor(Color.GRAY)
-                    } else {
-                        name.paintFlags = name.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                        name.setTextColor(Color.parseColor("#1F4D2E"))
-                        task.setTextColor(Color.BLACK)
-                    }
-                    checkbox.setOnCheckedChangeListener { _, isChecked -> onToggle(reminder, isChecked) }
                 }
+                checkbox.setOnCheckedChangeListener { _, isChecked -> onToggle(reminder, isChecked) }
 
                 val iconRes = when {
                     reminder.taskType.contains("Water", true) -> R.drawable.ic_watering
-                    reminder.taskType.contains("Fertiliz", true) -> R.drawable.ic_fertilizing
+                    reminder.taskType.contains("Fertilizing", true) -> R.drawable.ic_fertilizing
                     reminder.taskType.contains("Harvest", true) -> R.drawable.ic_harvesting
                     reminder.taskType.contains("Pest", true) -> R.drawable.ic_pest_control
                     else -> android.R.drawable.ic_menu_today
@@ -536,4 +551,15 @@ class RemindersActivity : AppCompatActivity() {
             }
         }
     }
+
+    data class CropInfo(
+        val name: String,
+        val scientificName: String,
+        val category: String
+    )
+
+    data class CropLibraryItem(
+        val name: String,
+        val category: String
+    )
 }

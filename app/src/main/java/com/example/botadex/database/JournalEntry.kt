@@ -13,5 +13,6 @@ data class JournalEntry(
     val date: String,
     val imagePaths: String, // Comma-separated list of image paths
     val dayCount: Int = 0,
+    val healthStatus: String = "Healthy",
     val timestamp: Long = System.currentTimeMillis()
 )

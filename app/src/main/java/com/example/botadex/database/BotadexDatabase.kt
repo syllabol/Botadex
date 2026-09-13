@@ -16,7 +16,7 @@ import androidx.room.TypeConverters
         AppMetadata::class,
         MaintenanceLog::class
     ],
-    version = 12,
+    version = 24,
     exportSchema = true
 )
 @TypeConverters(DataConverters::class)

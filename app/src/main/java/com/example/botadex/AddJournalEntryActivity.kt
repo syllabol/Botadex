@@ -16,9 +16,11 @@ import android.view.Window
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,6 +42,7 @@ class AddJournalEntryActivity : AppCompatActivity() {
     private lateinit var db: BotadexDatabase
     private var journalId: Int = -1
     private var targetCollectionId: Int = -1
+    private var detectedHealth: String? = null
     private val imagePaths = mutableListOf<String>()
 
     private lateinit var imagesRecyclerView: RecyclerView
@@ -49,6 +52,10 @@ class AddJournalEntryActivity : AppCompatActivity() {
     private lateinit var dateEditText: EditText
     private lateinit var notesEditText: EditText
     private lateinit var saveButton: ImageButton
+    private lateinit var compareButton: View
+    
+    private lateinit var healthChip: TextView
+    private lateinit var diseaseChip: TextView
 
     private val REQUEST_CAMERA = 101
     private val REQUEST_GALLERY = 102
@@ -68,7 +75,11 @@ class AddJournalEntryActivity : AppCompatActivity() {
         dateEditText = findViewById(R.id.journalDate)
         notesEditText = findViewById(R.id.journalNotes)
         saveButton = findViewById(R.id.saveJournalButtonTop)
+        compareButton = findViewById(R.id.compareButton)
         
+        healthChip = findViewById(R.id.journalHealthChip)
+        diseaseChip = findViewById(R.id.journalDiseaseChip)
+
         findViewById<View>(R.id.backButton).setOnClickListener { finish() }
 
         // Bottom Navigation
@@ -79,6 +90,7 @@ class AddJournalEntryActivity : AppCompatActivity() {
 
         journalId = intent.getIntExtra("JOURNAL_ID", -1)
         targetCollectionId = intent.getIntExtra("COLLECTION_ID", -1)
+        detectedHealth = intent.getStringExtra("DETECTED_HEALTH")
         
         if (journalId != -1) {
             setupReadMode()
@@ -94,11 +106,53 @@ class AddJournalEntryActivity : AppCompatActivity() {
                 saveEntry()
             }
         }
+
+        compareButton.setOnClickListener {
+            showCompareOptions()
+        }
+    }
+
+    private fun updateHealthUI(health: String?) {
+        val finalHealth = health ?: "Healthy"
+        val healthLower = finalHealth.lowercase(Locale.getDefault())
+        
+        when {
+            healthLower == "healthy" -> {
+                healthChip.text = "Healthy"
+                healthChip.setBackgroundResource(R.drawable.bg_chip_growing)
+                healthChip.setTextColor(ContextCompat.getColor(this, R.color.status_healthy_text))
+                healthChip.visibility = View.VISIBLE
+                diseaseChip.visibility = View.GONE
+            }
+            healthLower == "attention" -> {
+                healthChip.text = "Attention"
+                healthChip.setBackgroundResource(R.drawable.bg_chip_attention)
+                healthChip.setTextColor(ContextCompat.getColor(this, R.color.status_attention_text))
+                healthChip.visibility = View.VISIBLE
+                
+                diseaseChip.text = "potential issue detected"
+                diseaseChip.setBackgroundResource(R.drawable.bg_chip_attention)
+                diseaseChip.setTextColor(ContextCompat.getColor(this, R.color.status_attention_text))
+                diseaseChip.visibility = View.VISIBLE
+            }
+            else -> {
+                healthChip.text = "Unhealthy"
+                healthChip.setBackgroundResource(R.drawable.bg_chip_warning)
+                healthChip.setTextColor(ContextCompat.getColor(this, R.color.status_warning_text))
+                healthChip.visibility = View.VISIBLE
+                
+                diseaseChip.text = finalHealth.lowercase(Locale.getDefault())
+                diseaseChip.setBackgroundResource(R.drawable.bg_chip_warning)
+                diseaseChip.setTextColor(ContextCompat.getColor(this, R.color.status_warning_text))
+                diseaseChip.visibility = View.VISIBLE
+            }
+        }
     }
 
     private fun setupReadMode() {
         isEditMode = false
         saveButton.visibility = View.GONE
+        compareButton.visibility = View.VISIBLE
         
         cropNameEditText.isEnabled = false
         dateEditText.isEnabled = false
@@ -108,9 +162,13 @@ class AddJournalEntryActivity : AppCompatActivity() {
             val entries = db.cropDao().getAllJournal()
             val entry = entries.find { it.id == journalId }
             entry?.let {
+                targetCollectionId = it.collectionId
                 cropNameEditText.setText(it.cropName)
                 dateEditText.setText(it.date)
                 notesEditText.setText(it.notes)
+                
+                detectedHealth = it.healthStatus
+                updateHealthUI(detectedHealth)
                 
                 imagePaths.clear()
                 if (it.imagePaths.isNotEmpty()) {
@@ -124,7 +182,10 @@ class AddJournalEntryActivity : AppCompatActivity() {
     private fun setupCreateMode() {
         isEditMode = true
         saveButton.visibility = View.VISIBLE
+        compareButton.visibility = View.GONE
         saveButton.setImageResource(android.R.drawable.ic_menu_save)
+        
+        updateHealthUI(detectedHealth)
         
         val initialImagePath = intent.getStringExtra("IMAGE_PATH")
         initialImagePath?.let { imagePaths.add(it) }
@@ -148,12 +209,36 @@ class AddJournalEntryActivity : AppCompatActivity() {
             val collections = db.cropDao().getAllCollectionsOnce()
             val collection = collections.find { it.id == targetCollectionId }
             if (collection != null) {
-                // Prefill with Plant Name (Collection Title) for consistent chronological labeling
                 cropNameEditText.setText(collection.title)
             } else {
                 val cropName = intent.getStringExtra("CROP_NAME")
                 cropNameEditText.setText(cropName)
             }
+        }
+    }
+
+    private fun showCompareOptions() {
+        lifecycleScope.launch {
+            val allEntries = db.cropDao().getJournalEntriesByCollection(targetCollectionId)
+            val otherEntries = allEntries.filter { it.id != journalId && it.imagePaths.isNotEmpty() }
+
+            if (otherEntries.isEmpty()) {
+                Toast.makeText(this@AddJournalEntryActivity, "No other entries with pictures to compare.", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            val entryTitles = otherEntries.map { "Day ${it.dayCount} (${it.date})" }.toTypedArray()
+            AlertDialog.Builder(this@AddJournalEntryActivity)
+                .setTitle("Select entry to compare with")
+                .setItems(entryTitles) { _, which ->
+                    val selectedEntry = otherEntries[which]
+                    val intent = Intent(this@AddJournalEntryActivity, CompareEntriesActivity::class.java)
+                    intent.putExtra("ENTRY1_ID", journalId)
+                    intent.putExtra("ENTRY2_ID", selectedEntry.id)
+                    startActivity(intent)
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
 
@@ -179,7 +264,6 @@ class AddJournalEntryActivity : AppCompatActivity() {
             val sdf = SimpleDateFormat("MMMM dd yyyy", Locale.getDefault())
             var dayCount = collection?.currentDay ?: 1
 
-            // Dynamic Day Calculation: Entry Date vs Planting Date
             if (collection != null) {
                 try {
                     val plantedDateObj = sdf.parse(collection.date)
@@ -193,23 +277,26 @@ class AddJournalEntryActivity : AppCompatActivity() {
                 }
             }
 
+            val finalHealth = detectedHealth ?: "Healthy"
+
             val journalEntry = JournalEntry(
                 id = 0,
                 collectionId = targetCollectionId,
-                cropName = name, // This acts as the Entry Title
+                cropName = name,
                 notes = notes,
                 date = date,
                 imagePaths = imagePaths.joinToString(","),
                 dayCount = if (dayCount > 0) dayCount else 1,
+                healthStatus = finalHealth,
                 timestamp = System.currentTimeMillis()
             )
 
             db.cropDao().insertJournalEntry(journalEntry)
             
-            // Interaction resets health to Healthy and updates last interaction date
+            // Interaction resets health to detected status (or Healthy) and updates timer
             collection?.let {
                 val updatedCollection = it.copy(
-                    healthStatus = "Healthy",
+                    healthStatus = finalHealth,
                     lastInteractionDate = System.currentTimeMillis()
                 )
                 db.cropDao().insertCollection(updatedCollection)
@@ -264,31 +351,37 @@ class AddJournalEntryActivity : AppCompatActivity() {
 
     private fun openGallery() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(intent, REQUEST_GALLERY)
+        pickImageLauncher.launch(intent)
+    }
+
+    private val pickImageLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri: Uri? = result.data?.data
+            uri?.let {
+                try {
+                    val inputStream = contentResolver.openInputStream(it)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    bitmap?.let { b ->
+                        val path = saveBitmapToFile(b)
+                        path?.let { p ->
+                            imagePaths.add(p)
+                            imageAdapter.notifyDataSetChanged()
+                        }
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            var bitmap: Bitmap? = null
-            when (requestCode) {
-                REQUEST_CAMERA -> {
-                    bitmap = data?.extras?.get("data") as? Bitmap
-                }
-                REQUEST_GALLERY -> {
-                    val uri: Uri? = data?.data
-                    uri?.let {
-                        try {
-                            val inputStream = contentResolver.openInputStream(it)
-                            bitmap = BitmapFactory.decodeStream(inputStream)
-                            inputStream?.close()
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                        }
-                    }
-                }
-            }
-
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CAMERA) {
+            val bitmap = data?.extras?.get("data") as? Bitmap
             bitmap?.let {
                 val path = saveBitmapToFile(it)
                 path?.let { p ->

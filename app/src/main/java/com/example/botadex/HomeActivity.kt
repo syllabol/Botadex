@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.botadex.admin.AdminDashboardActivity
 import com.example.botadex.database.BotadexDatabase
 import com.example.botadex.database.DatabaseManager
 import com.example.botadex.database.JournalCollection
@@ -44,7 +45,7 @@ class HomeActivity : AppCompatActivity() {
 
         db = BotadexDatabase.getDatabase(this)
         
-        // Ensure database is up to date with bundled data
+        // Ensure database is initialized with bundled data if version increased
         lifecycleScope.launch {
             DatabaseManager(this@HomeActivity).checkAndPerformMaintenance()
         }
@@ -167,34 +168,42 @@ class HomeActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        // 2. Sync Target Days if it is still at default 30 or sum is needed
+        // 2. Sync Target Days from Library
         val normalizedName = updated.cropName.lowercase().trim()
         val cropObj = db.cropDao().getCropByName(normalizedName)
         
-        val correctTotalDays = when {
-            normalizedName.contains("cassava") -> 335
-            normalizedName.contains("tomato") -> 98
-            normalizedName.contains("potato") && !normalizedName.contains("sweet") -> 105
-            normalizedName.contains("ube") -> 270
-            normalizedName.contains("kamote") || normalizedName.contains("sweet potato") -> 140
-            normalizedName.contains("onion") -> 125
-            cropObj != null && cropObj.totalDays > 0 -> cropObj.totalDays
-            else -> 30
+        // Prefer Database values (editable by Admin) over hardcoded ones
+        val correctTotalDays = if (cropObj != null && cropObj.totalDays > 0) {
+            cropObj.totalDays
+        } else {
+            when {
+                normalizedName.contains("cassava") -> 335
+                normalizedName.contains("tomato") -> 98
+                normalizedName.contains("potato") && !normalizedName.contains("sweet") -> 105
+                normalizedName.contains("ube") -> 270
+                normalizedName.contains("kamote") || normalizedName.contains("sweet potato") -> 140
+                normalizedName.contains("onion") -> 125
+                else -> 30
+            }
         }
 
-        if (updated.targetDays != correctTotalDays && correctTotalDays != 30) {
+        if (updated.targetDays != correctTotalDays) {
             updated = updated.copy(targetDays = correctTotalDays)
             needsUpdate = true
         }
 
-        // 3. Update Health Status
+        // 3. Update Health Status from latest reading/interaction
+        val entries = db.cropDao().getJournalEntriesByCollection(collection.id)
+        val latestEntry = entries.firstOrNull()
+        val baseHealth = latestEntry?.healthStatus ?: updated.healthStatus
+
         val lastInteraction = updated.lastInteractionDate
         val diffInteraction = System.currentTimeMillis() - lastInteraction
         val daysSinceInteraction = (diffInteraction / (1000 * 60 * 60 * 24)).toInt()
         val newHealth = when {
             daysSinceInteraction >= 7 -> "Warning"
-            daysSinceInteraction >= 3 -> "Attention"
-            else -> "Healthy"
+            daysSinceInteraction >= 3 -> if (baseHealth.lowercase() == "healthy") "Attention" else baseHealth
+            else -> baseHealth
         }
 
         if (newHealth != updated.healthStatus) {
@@ -245,12 +254,12 @@ class HomeActivity : AppCompatActivity() {
 
         AlertDialog.Builder(this)
             .setTitle("Admin Mode Access")
-            .setMessage("Please enter the secret PIN to continue.")
+            .setMessage("Please enter the secret PIN to access the Dashboard.")
             .setView(layout)
             .setPositiveButton("Access") { _, _ ->
                 val enteredPin = pinEditText.text.toString()
-                if (enteredPin == "1234") { // Default secret PIN
-                    startActivity(Intent(this, AdminActivity::class.java))
+                if (enteredPin == "1234") { // Admin PIN
+                    startActivity(Intent(this, AdminDashboardActivity::class.java))
                 } else {
                     Toast.makeText(this, "Incorrect PIN", Toast.LENGTH_SHORT).show()
                 }
@@ -364,8 +373,7 @@ class HomeActivity : AppCompatActivity() {
             holder.chipStatus.text = item.status
             updateStatusChip(holder.chipStatus, item.status)
 
-            holder.chipHealth.text = item.healthStatus
-            updateHealthChip(holder.chipHealth, item.healthStatus)
+            updateHealthChipStyle(holder.chipHealth, item.healthStatus)
 
             if (item.imagePath != null) {
                 val bitmap = BitmapFactory.decodeFile(item.imagePath)
@@ -414,22 +422,23 @@ class HomeActivity : AppCompatActivity() {
             }
         }
 
-        private fun updateHealthChip(view: TextView, health: String) {
-            when (health) {
-                "Healthy" -> {
+        private fun updateHealthChipStyle(view: TextView, health: String) {
+            val healthLower = health.lowercase(Locale.getDefault())
+            when {
+                healthLower == "healthy" -> {
+                    view.text = "Healthy"
                     view.setBackgroundResource(R.drawable.bg_chip_growing)
                     view.setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.status_healthy_text))
                 }
-                "Attention" -> {
+                healthLower == "attention" -> {
+                    view.text = "Attention"
                     view.setBackgroundResource(R.drawable.bg_chip_attention)
                     view.setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.status_attention_text))
                 }
-                "Warning" -> {
+                else -> {
+                    view.text = if (healthLower == "warning") "Warning" else health
                     view.setBackgroundResource(R.drawable.bg_chip_warning)
                     view.setTextColor(ContextCompat.getColor(this@HomeActivity, R.color.status_warning_text))
-                }
-                else -> {
-                    view.setBackgroundResource(0)
                 }
             }
         }
